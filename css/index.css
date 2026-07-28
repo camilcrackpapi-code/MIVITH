@@ -10,30 +10,30 @@
 .hero h2 { font-size: 3em; margin-bottom: 10px; }
 .hero p { font-size: 1.2em; margin-bottom: 30px; }
 
-/* --- Estilos para el botón flotante de Admin --- */
+/* Definición completa (Base + Hover + SVG) */
 .btn-flotante-admin {
     position: fixed;
     bottom: 25px;
     right: 25px; 
-    width: 60px;
-    height: 60px;
-    background-color: #512da8;
+    width: 60px;      
+    height: 60px;     
+    background-color: #512da8; 
     color: white;
     border-radius: 50%;
-    display: flex;
+    display: flex;    
     justify-content: center;
     align-items: center;
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     z-index: 1000;
     transition: transform 0.2s, background-color 0.2s;
+    text-decoration: none; 
 }
 
 .btn-flotante-admin:hover {
-    background-color: #3e2084; /* Un morado más oscuro al pasar el mouse */
+    background-color: #3e2084;
     transform: scale(1.05);
 }
 
-/* Evita que el ícono SVG crezca sin control */
 .btn-flotante-admin svg {
     width: 28px;
     height: 28px;
