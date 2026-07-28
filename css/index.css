@@ -10,6 +10,35 @@
 .hero h2 { font-size: 3em; margin-bottom: 10px; }
 .hero p { font-size: 1.2em; margin-bottom: 30px; }
 
+/* --- Estilos para el botón flotante de Admin --- */
+.btn-flotante-admin {
+    position: fixed;
+    bottom: 25px;
+    right: 25px; 
+    width: 60px;
+    height: 60px;
+    background-color: #512da8;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    z-index: 1000;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.btn-flotante-admin:hover {
+    background-color: #3e2084; /* Un morado más oscuro al pasar el mouse */
+    transform: scale(1.05);
+}
+
+/* Evita que el ícono SVG crezca sin control */
+.btn-flotante-admin svg {
+    width: 28px;
+    height: 28px;
+}
+
 .menu-destacado { 
     padding: 50px 20px; 
     text-align: center; 
@@ -44,6 +73,7 @@
     margin: 0 auto 15px auto; 
     display: block; 
 }
+
 
 .plato h3 { color: #d35400; margin-bottom: 10px;}
 .plato p { margin-bottom: 10px; color: #555; }
