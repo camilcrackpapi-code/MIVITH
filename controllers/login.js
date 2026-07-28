@@ -4,7 +4,7 @@ import {
   createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
-// Función para mostrar errores en el párrafo correspondiente
+// Función auxiliar para mostrar errores
 function mostrarError(idElemento, texto) {
   const m = document.getElementById(idElemento);
   if (m) {
@@ -13,7 +13,7 @@ function mostrarError(idElemento, texto) {
   }
 }
 
-// 1. LÓGICA DE INICIO DE SESIÓN
+// LÓGICA DE INICIO DE SESIÓN
 const formLogin = document.getElementById("formLogin");
 if (formLogin) {
   formLogin.addEventListener("submit", async (e) => {
@@ -22,12 +22,11 @@ if (formLogin) {
     const pass = document.getElementById("passLogin").value;
     const mensajeEl = document.getElementById("mensajeLogin");
     
-    mensajeEl.classList.add("oculto"); // Ocultar error previo
+    mensajeEl.classList.add("oculto");
 
     try {
       await signInWithEmailAndPassword(auth, email, pass);
-      // Redirigir al admin (si está en la misma carpeta que acceso.html)
-      window.location.href = "admin.html"; 
+      window.location.href = "admin.html"; // Asegúrate que admin.html esté en la misma carpeta que acceso.html
     } catch (error) {
       mostrarError("mensajeLogin", "Correo o contraseña incorrectos.");
       console.error("Error Login:", error.code);
@@ -35,7 +34,7 @@ if (formLogin) {
   });
 }
 
-// 2. LÓGICA DE REGISTRO
+// LÓGICA DE REGISTRO
 const formRegistro = document.getElementById("formRegistro");
 if (formRegistro) {
   formRegistro.addEventListener("submit", async (e) => {
