@@ -10,7 +10,7 @@
 .hero h2 { font-size: 3em; margin-bottom: 10px; }
 .hero p { font-size: 1.2em; margin-bottom: 30px; }
 
-/* Definición completa (Base + Hover + SVG) */
+/* Definición completa  */
 .btn-flotante-admin {
     position: fixed;
     bottom: 25px;
