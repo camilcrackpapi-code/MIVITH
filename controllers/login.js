@@ -4,7 +4,7 @@ import {
   createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
-// Función para mostrar errores de forma dinámica
+// Función para mostrar errores en el párrafo correspondiente
 function mostrarError(idElemento, texto) {
   const m = document.getElementById(idElemento);
   if (m) {
@@ -13,7 +13,7 @@ function mostrarError(idElemento, texto) {
   }
 }
 
-// 1. LÓGICA DE LOGIN
+// 1. LÓGICA DE INICIO DE SESIÓN
 const formLogin = document.getElementById("formLogin");
 if (formLogin) {
   formLogin.addEventListener("submit", async (e) => {
@@ -22,15 +22,15 @@ if (formLogin) {
     const pass = document.getElementById("passLogin").value;
     const mensajeEl = document.getElementById("mensajeLogin");
     
-    mensajeEl.classList.add("oculto"); // Limpiar error previo
+    mensajeEl.classList.add("oculto"); // Ocultar error previo
 
     try {
       await signInWithEmailAndPassword(auth, email, pass);
-      // Redirigir al admin
+      // Redirigir al admin (si está en la misma carpeta que acceso.html)
       window.location.href = "admin.html"; 
     } catch (error) {
       mostrarError("mensajeLogin", "Correo o contraseña incorrectos.");
-      console.error("Error:", error.code);
+      console.error("Error Login:", error.code);
     }
   });
 }
@@ -44,7 +44,7 @@ if (formRegistro) {
     const pass = document.getElementById("passReg").value;
     const mensajeEl = document.getElementById("mensajeReg");
     
-    mensajeEl.classList.add("oculto"); // Limpiar error previo
+    mensajeEl.classList.add("oculto");
 
     if (pass.length < 6) {
       mostrarError("mensajeReg", "La contraseña debe tener al menos 6 caracteres.");
@@ -57,6 +57,7 @@ if (formRegistro) {
       window.location.href = "admin.html";
     } catch (error) {
       mostrarError("mensajeReg", "Error: " + error.code);
+      console.error("Error Registro:", error.code);
     }
   });
 }
