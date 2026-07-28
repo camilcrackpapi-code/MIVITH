@@ -10,7 +10,6 @@
 </head>
 <body>
 
-    <!-- Encabezado simple sin menú de navegación público -->
     <header style="text-align: center; padding: 15px 0;">
         <h1 style="margin:0;">Mivith - Pedido en Mesa <span id="numero-mesa-titulo"></span></h1>
     </header>
@@ -137,7 +136,7 @@
         </div>
     </section>
 
-    <!-- Botón Flotante del Carrito -->
+    <!--  Carrito -->
     <div class="cart-float-btn" onclick="toggleCarrito()">
         🛒 Pedido (<span id="cart-count">0</span>) | $<span id="cart-float-total">0</span>
     </div>
@@ -163,7 +162,7 @@
 
         let carrito = [];
         
-        // Detección automática del número de mesa desde la URL del código QR
+        // Detección del número de mesa 
         const urlParams = new URLSearchParams(window.location.search);
         const mesaQR = urlParams.get('mesa');
         
@@ -171,12 +170,12 @@
             document.getElementById('numero-mesa-titulo').innerText = "(Mesa " + mesaQR + ")";
         }
 
-        // Lógica para abrir y cerrar el panel lateral
+        // abrir y cerrar el panel lateral
         window.toggleCarrito = function() {
             document.getElementById('cart-sidebar').classList.toggle('active');
         };
 
-        // Lógica para agregar productos
+        //  agregar productos
         window.agregarAlCarrito = function(nombre, precio) {
             const itemExistente = carrito.find(item => item.nombre === nombre);
             if (itemExistente) {
@@ -188,7 +187,7 @@
             document.getElementById('cart-sidebar').classList.add('active');
         };
 
-        // Lógica para sumar o restar cantidades dentro del carrito
+        //  sumar o restar cantidades dentro del carrito
         window.cambiarCantidad = function(nombre, cambio) {
             const item = carrito.find(i => i.nombre === nombre);
             if (item) {
@@ -200,7 +199,7 @@
             actualizarInterfazCarrito();
         };
 
-        // Lógica para actualizar los totales y la lista visual del pedido
+        // actualizar los totales y la lista visual del pedido
         function actualizarInterfazCarrito() {
             const contenedorItems = document.getElementById('cart-items');
             const totalElemento = document.getElementById('cart-total');
@@ -246,7 +245,7 @@
             contadorElemento.innerText = totalCantidad;
         }
 
-        // Lógica para procesar el envío del pedido hacia Firestore en tiempo real
+        //  procesar el envío del pedido hacia Firestore 
         window.enviarPedidoAlAdmin = async function() {
             if (carrito.length === 0) {
                 alert("🛒 Selecciona al menos un producto para realizar tu pedido.");
