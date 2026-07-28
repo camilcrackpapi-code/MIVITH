@@ -52,6 +52,16 @@
             });
         };
 
+        import { auth } from "./controllers/firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+        onAuthStateChanged(auth, (user) => {
+          if (!user) {
+            // Si no hay usuario, redirigir al login
+            window.location.href = "acceso.html";
+          }
+        });
+
         // Reloj en tiempo real
         function actualizarReloj() {
             const ahora = new Date();
@@ -155,5 +165,6 @@
             }
         };
     </script>
+    
 </body>
 </html>
