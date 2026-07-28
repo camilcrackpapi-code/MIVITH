@@ -1,0 +1,135 @@
+.body-acceso {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f7f6;
+    margin: 0;
+}
+
+.contenedor-acceso {
+    background: white;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.cabecera-acceso {
+    background-color: #052659;
+    color: white;
+    text-align: center;
+    padding: 20px 20px 0 20px;
+}
+
+.cabecera-acceso h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.tabs {
+    display: flex;
+}
+
+.tab {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    color: #c1d5ee;
+    border: none;
+    padding: 12px 0;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.tab:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.tab.activo {
+    background: white;
+    color: #052659;
+    border-radius: 8px 8px 0 0;
+}
+
+.cuerpo-acceso {
+    padding: 30px;
+}
+
+.formulario {
+    display: none;
+    flex-direction: column;
+}
+
+.formulario.activo {
+    display: flex;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+.formulario label {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.formulario input {
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.formulario input:focus {
+    outline: none;
+    border-color: #052659;
+    box-shadow: 0 0 5px rgba(5, 38, 89, 0.2);
+}
+
+.btn-principal {
+    background-color: #7da0ca;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-principal:hover {
+    background-color: #052659;
+}
+
+.mensaje-alerta {
+    color: #d32f2f;
+    font-size: 0.9rem;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.oculto {
+    display: none !important;
+}
+
+.pie-acceso {
+    text-align: center;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-top: 1px solid #eee;
+}
+
+.pie-acceso a {
+    color: #7da0ca;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

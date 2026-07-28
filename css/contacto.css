@@ -1,0 +1,10 @@
+.contacto-section { padding: 60px 20px; max-width: 1000px; margin: 0 auto; text-align: center; }
+.contacto-section h2 { color: #d97706; font-size: 2.5em; margin-bottom: 10px; }
+.contacto-contenedor { display: flex; gap: 40px; margin-top: 40px; text-align: left; }
+.contacto-info { flex: 1; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(61, 40, 23, 0.1); border-left: 4px solid #d97706; }
+.contacto-info h3 { color: #b45309; margin-bottom: 20px; }
+.contacto-info p { margin-bottom: 15px; font-size: 1.1em; color: #3d2817; }
+.contacto-form { flex: 1.5; display: flex; flex-direction: column; gap: 15px; }
+.contacto-form input, .contacto-form textarea { width: 100%; padding: 15px; border: 1px solid #fbbf24; border-radius: 5px; font-family: inherit; background-color: #ffffff; color: #3d2817; }
+.contacto-form input:focus, .contacto-form textarea:focus { outline: none; border-color: #d97706; box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1); }
+@media (max-width: 768px) { .contacto-contenedor { flex-direction: column; } }

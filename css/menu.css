@@ -1,0 +1,101 @@
+/* Estilo Temático: Cafesita con Líneas */
+
+/* Base y Fondo */
+body {
+    background-color: #fdfbf7;
+    color: #4e342e;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.seccion-carta {
+    padding: 40px 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    border: 2px solid #d7ccc8;
+    background: #ffffff;
+}
+
+.seccion-carta h2 {
+    text-align: center;
+    color: #5d4037;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #5d4037;
+    display: inline-block;
+    width: 100%;
+    padding-bottom: 10px;
+}
+
+.instruccion-scroll {
+    text-align: center;
+    color: #8d6e63;
+    font-size: 0.9rem;
+    margin-bottom: 30px;
+    font-style: italic;
+}
+
+/* Contenedor Horizontal */
+.contenedor-horizontal {
+    display: flex;
+    gap: 30px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+    border-top: 1px dashed #d7ccc8;
+    padding-top: 20px;
+}
+
+/* Columnas tipo tarjeta con borde */
+.columna-carta {
+    min-width: 320px;
+    padding: 20px;
+    border: 1px solid #d7ccc8;
+    border-radius: 5px;
+    background: #fffaf0; /* Color crema suave */
+}
+
+.titulo-categoria {
+    color: #5d4037;
+    border-bottom: 1px solid #5d4037;
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+}
+
+/* Items con líneas separadoras */
+.item-carta {
+    margin-bottom: 15px;
+    border-bottom: 1px dotted #d7ccc8;
+    padding-bottom: 10px;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 5px;
+}
+
+.item-header h4 {
+    margin: 0;
+    color: #3e2723;
+}
+
+.item-precio {
+    font-weight: bold;
+    color: #8d6e63;
+}
+
+.item-desc {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #6d4c41;
+    line-height: 1.4;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 600px) {
+    .columna-carta {
+        min-width: 260px;
+    }
+}
