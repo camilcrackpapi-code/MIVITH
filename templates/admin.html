@@ -37,7 +37,7 @@
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
         import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-        // 1. Verificación de Autenticación con Firebase Auth
+        // Autenticación 
         onAuthStateChanged(auth, (usuario) => {
             if (!usuario) {
                 alert("Acceso denegado. Debes iniciar sesión como administrador.");
@@ -57,12 +57,12 @@
 
         onAuthStateChanged(auth, (user) => {
           if (!user) {
-            // Si no hay usuario, redirigir al login
+            // Si no hay usuario
             window.location.href = "acceso.html";
           }
         });
 
-        // Reloj en tiempo real
+        // Reloj 
         function actualizarReloj() {
             const ahora = new Date();
             document.getElementById('reloj').innerText = ahora.toLocaleTimeString();
@@ -70,7 +70,7 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
-        // 2. Escuchar pedidos en tiempo real desde Firestore
+        //  Escuchar pedidos en tiempo real desde Firestore
         const q = query(collection(db, "pedidos"), orderBy("timestamp", "desc"));
 
         onSnapshot(q, (snapshot) => {
@@ -129,7 +129,7 @@
             contenedor.innerHTML = acumuladoHTML;
         });
 
-        // 3. Modificar estado de la orden en Firestore
+        // Modificar estado de la orden 
         window.alternarEstadoOrden = async (id, estadoActual) => {
             try {
                 const refPedido = doc(db, "pedidos", id);
@@ -141,7 +141,7 @@
             }
         };
 
-        // 4. Eliminar una comanda individual
+        //  Eliminar comanda 
         window.eliminarOrden = async (id) => {
             if (confirm("¿Estás seguro de eliminar esta comanda?")) {
                 try {
@@ -152,7 +152,7 @@
             }
         };
 
-        // 5. Borrar todo el historial de comandas
+        // Borrar todo el historial
         window.limpiarTodosLosPedidos = async () => {
             if (confirm("⚠️ ¿Deseas borrar TODOS los pedidos recibidos?")) {
                 try {
