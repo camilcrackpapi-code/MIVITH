@@ -262,9 +262,9 @@
             const confirmar = confirm("¿Deseas enviar tu pedido a la cocina?");
             if (!confirmar) return;
 
-            const numeroMesa = prompt("Por favor, ingresa tu Número de Mesa o Nombre:");
+            const numeroMesa = prompt("Por favor, ingresa tu Número de Mesa :");
             if (!numeroMesa || numeroMesa.trim() === "") {
-                alert("❌ Es necesario ingresar la mesa o nombre para procesar el pedido.");
+                alert("❌ Es necesario ingresar la mesa para procesar el pedido.");
                 return;
             }
 
