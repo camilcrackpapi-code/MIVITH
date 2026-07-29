@@ -250,7 +250,13 @@
                 alert("Tu pedido está vacío.");
                 return;
             }
-            alert("¡Pedido enviado con éxito! (En el siguiente paso conectaremos esto con la base de datos en tiempo real)");
+
+            const confirmar = confirm("¿Deseas enviar tu pedido?");
+            if (!confirmar) {
+                return;
+            }
+
+            alert("¡Pedido enviado con éxito!");
         }
     </script>
 </body>
