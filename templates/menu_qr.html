@@ -166,11 +166,11 @@
 
         <div class="cart-footer">
             <h4 style="margin: 0; font-size: 1.1rem;">Total: $<span id="cart-total">0</span> COP</h4>
-            <button class="btn-submit-order" onclick="enviarPedidoAlAdmin()">Enviar Pedido al Admin</button>
+            <button class="btn-submit-order" id="btnEnviarPedido">Enviar Pedido al Admin</button>
         </div>
     </div>
 
-    <!-- Lógica JavaScript del Carrito -->
+    <!-- Lógica del Carrito de Compras -->
     <script>
         let carrito = [];
 
@@ -244,8 +244,14 @@
             floatTotalElemento.innerText = totalFormateado;
             contadorElemento.innerText = totalCantidad;
         }
+    </script>
 
-        function enviarPedidoAlAdmin() {
+    <!-- Conexión con Firebase Firestore -->
+    <script type="module">
+        import { db } from '../controllers/firebase-config.js';
+        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+        document.getElementById('btnEnviarPedido').addEventListener('click', async function() {
             if (carrito.length === 0) {
                 alert("Tu pedido está vacío.");
                 return;
@@ -256,8 +262,40 @@
                 return;
             }
 
-            alert("¡Pedido enviado con éxito!");
-        }
+            const numeroMesa = prompt("Por favor, ingresa tu número de Mesa o Nombre:");
+            if (numeroMesa === null || numeroMesa.trim() === "") {
+                alert("❌ Es necesario ingresar tu mesa o nombre para procesar el pedido.");
+                return;
+            }
+
+            const btnSubmit = document.getElementById('btnEnviarPedido');
+            btnSubmit.innerText = "Enviando...";
+            btnSubmit.disabled = true;
+
+            const totalCalculado = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+
+            try {
+                await addDoc(collection(db, "pedidos"), {
+                    cliente: `Mesa ${numeroMesa.trim()}`,
+                    items: carrito,
+                    total: totalCalculado,
+                    completada: false,
+                    timestamp: serverTimestamp()
+                });
+
+                alert("¡Pedido enviado con éxito!");
+                carrito = [];
+                actualizarInterfazCarrito();
+                toggleCarrito();
+            } catch (error) {
+                console.error("Error al enviar pedido a Firebase:", error);
+                alert("❌ Ocurrió un error al enviar tu pedido. Por favor intenta de nuevo.");
+            } finally {
+                btnSubmit.innerText = "Enviar Pedido al Admin";
+                btnSubmit.disabled = false;
+            }
+        });
     </script>
+
 </body>
 </html>
