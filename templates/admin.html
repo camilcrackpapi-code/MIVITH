@@ -1,172 +1,158 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Cocina - Mivith</title>
-    <link rel="stylesheet" href="../css/global.css">
-    <link rel="stylesheet" href="../css/admin.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Cocina - Mivith</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>Mivith Admin</h2>
-        <ul class="menu-lateral">
-            <li class="activo">🔔 Órdenes Activas</li>
-            <li onclick="cerrarSesion()">🚪 Cerrar Sesión</li>
-        </ul>
-    </div>
+    <div class="sidebar">
+        <h2>Mivith Admin</h2>
+        <ul class="menu-lateral">
+            <li class="activo">🔔 Órdenes Activas</li>
+            <li onclick="cerrarSesion()">🚪 Cerrar Sesión</li>
+        </ul>
+    </div>
 
-    <div class="main-content">
-        <div class="header-panel">
-            <div>
-                <h1 style="margin: 0;">Monitor de Cocina (Comandas)</h1>
-                <p style="margin: 5px 0 0 0; color: #7da0ca;">Pedidos recibidos desde el menú web en tiempo real</p>
-            </div>
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <button class="btn-limpiar-todo" onclick="limpiarTodosLosPedidos()">🗑️ Borrar Historial</button>
-                <div class="reloj" id="reloj">--:--:--</div>
-            </div>
-        </div>
+    <div class="main-content">
+        <div class="header-panel">
+            <div>
+                <h1 style="margin: 0;">Monitor de Cocina (Comandas)</h1>
+                <p style="margin: 5px 0 0 0; color: #7da0ca;">Pedidos recibidos desde el menú web en tiempo real</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <button class="btn-limpiar-todo" onclick="limpiarTodosLosPedidos()">🗑️ Borrar Historial</button>
+                <div class="reloj" id="reloj">--:--:--</div>
+            </div>
+        </div>
 
-        <div class="ordenes-grid" id="contenedorOrdenes"></div>
-    </div>
+        <div class="ordenes-grid" id="contenedorOrdenes"></div>
+    </div>
 
-    <script type="module">
-        import { auth, db } from '../controllers/firebase-config.js';
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-        import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+    <script type="module">
+        import { auth, db } from '../controllers/firebase-config.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+        import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-        // Autenticación 
-        onAuthStateChanged(auth, (usuario) => {
-            if (!usuario) {
-                alert("Acceso denegado. Debes iniciar sesión como administrador.");
-                window.location.href = "../index.html";
-            }
-        });
+        onAuthStateChanged(auth, (usuario) => {
+            if (!usuario) {
+                alert("Acceso denegado. Debes iniciar sesión como administrador.");
+                window.location.href = "../index.html";
+            }
+        });
 
-        // Cerrar sesión
-        window.cerrarSesion = () => {
-            signOut(auth).then(() => {
-                window.location.href = "../index.html";
-            });
-        };
+        window.cerrarSesion = () => {
+            signOut(auth).then(() => {
+                window.location.href = "../index.html";
+            });
+        };
 
-        import { auth } from "./controllers/firebase-config.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+        function actualizarReloj() {
+            const ahora = new Date();
+            document.getElementById('reloj').innerText = ahora.toLocaleTimeString();
+        }
+        setInterval(actualizarReloj, 1000);
+        actualizarReloj();
 
-        onAuthStateChanged(auth, (user) => {
-          if (!user) {
-            // Si no hay usuario
-            window.location.href = "acceso.html";
-          }
-        });
+        const q = query(collection(db, "pedidos"), orderBy("timestamp", "desc"));
 
-        // Reloj 
-        function actualizarReloj() {
-            const ahora = new Date();
-            document.getElementById('reloj').innerText = ahora.toLocaleTimeString();
-        }
-        setInterval(actualizarReloj, 1000);
-        actualizarReloj();
+        onSnapshot(q, (snapshot) => {
+            const contenedor = document.getElementById('contenedorOrdenes');
+            
+            if (snapshot.empty) {
+                contenedor.innerHTML = '<h3 style="color: #7da0ca; grid-column: 1/-1; text-align: center;">No hay pedidos registrados en este momento.</h3>';
+                return;
+            }
 
-        //  Escuchar pedidos en tiempo real desde Firestore
-        const q = query(collection(db, "pedidos"), orderBy("timestamp", "desc"));
+            let acumuladoHTML = '';
 
-        onSnapshot(q, (snapshot) => {
-            const contenedor = document.getElementById('contenedorOrdenes');
-            
-            if (snapshot.empty) {
-                contenedor.innerHTML = '<h3 style="color: #7da0ca; grid-column: 1/-1; text-align: center;">No hay pedidos registrados en este momento.</h3>';
-                return;
-            }
+            snapshot.forEach((docSnap) => {
+                const orden = docSnap.data();
+                const id = docSnap.id;
+                let itemsHTML = '';
 
-            let acumuladoHTML = '';
+                const listaItems = orden.items || orden.platos || [];
+                
+                listaItems.forEach(p => {
+                    const cantidad = p.cantidad || p.cant || 1;
+                    const precio = p.precio ? `($${(p.precio * cantidad).toLocaleString('es-CO')})` : '';
+                    itemsHTML += `<li><span>${cantidad}x ${p.nombre}</span> <small>${precio}</small></li>`;
+                });
 
-            snapshot.forEach((docSnap) => {
-                const orden = docSnap.data();
-                const id = docSnap.id;
-                let itemsHTML = '';
+                const estaCompletada = orden.completada || false;
+                const cliente = orden.cliente || 'Cliente';
+                
+                let hora = 'Reciente';
+                if (orden.timestamp) {
+                    hora = orden.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                } else if (orden.fecha) {
+                    hora = orden.fecha;
+                }
 
-                const listaItems = orden.items || orden.platos || [];
-                
-                listaItems.forEach(p => {
-                    const cantidad = p.cantidad || p.cant || 1;
-                    const precio = p.precio ? `($${(p.precio * cantidad).toLocaleString('es-CO')})` : '';
-                    itemsHTML += `<li><span>${cantidad}x ${p.nombre}</span> <small>${precio}</small></li>`;
-                });
+                const total = orden.total ? `$${orden.total.toLocaleString('es-CO')} COP` : '';
 
-                const estaCompletada = orden.completada || false;
-                const cliente = orden.cliente || 'Cliente';
-                
-                let hora = 'Reciente';
-                if (orden.timestamp) {
-                    hora = orden.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                } else if (orden.fecha) {
-                    hora = orden.fecha;
-                }
+                acumuladoHTML += `
+                    <div class="orden-card ${estaCompletada ? 'completada' : ''}">
+                        <div class="cliente-tag">👤 ${cliente}</div>
+                        <h3 style="margin-top: 0; color: #052659;">Orden</h3>
+                        <div class="cliente-info">🕒 Recibido: ${hora}</div>
+                        <ul class="lista-platos">
+                            ${itemsHTML}
+                        </ul>
+                        ${total ? `<div class="total-pedido">Total: ${total}</div>` : ''}
+                        <button class="btn-despachar ${estaCompletada ? 'btn-completado' : ''}" 
+                                onclick="alternarEstadoOrden('${id}', ${estaCompletada})">
+                            ${estaCompletada ? '✓ Completado (Deshacer)' : 'Despachar Pedido ✓'}
+                        </button>
+                        <button class="btn-eliminar" onclick="eliminarOrden('${id}')">Eliminar Comanda</button>
+                    </div>
+                `;
+            });
 
-                const total = orden.total ? `$${orden.total.toLocaleString('es-CO')} COP` : '';
+            contenedor.innerHTML = acumuladoHTML;
+        }, (error) => {
+            console.error(error);
+        });
 
-                acumuladoHTML += `
-                    <div class="orden-card ${estaCompletada ? 'completada' : ''}">
-                        <div class="cliente-tag">👤 ${cliente}</div>
-                        <h3 style="margin-top: 0; color: #052659;">Orden</h3>
-                        <div class="cliente-info">🕒 Recibido: ${hora}</div>
-                        <ul class="lista-platos">
-                            ${itemsHTML}
-                        </ul>
-                        ${total ? `<div class="total-pedido">Total: ${total}</div>` : ''}
-                        <button class="btn-despachar ${estaCompletada ? 'btn-completado' : ''}" 
-                                onclick="alternarEstadoOrden('${id}', ${estaCompletada})">
-                            ${estaCompletada ? '✓ Completado (Deshacer)' : 'Despachar Pedido ✓'}
-                        </button>
-                        <button class="btn-eliminar" onclick="eliminarOrden('${id}')">Eliminar Comanda</button>
-                    </div>
-                `;
-            });
+        window.alternarEstadoOrden = async (id, estadoActual) => {
+            try {
+                const refPedido = doc(db, "pedidos", id);
+                await updateDoc(refPedido, {
+                    completada: !estadoActual
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        };
 
-            contenedor.innerHTML = acumuladoHTML;
-        });
+        window.eliminarOrden = async (id) => {
+            if (confirm("¿Estás seguro de eliminar esta comanda?")) {
+                try {
+                    await deleteDoc(doc(db, "pedidos", id));
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        };
 
-        // Modificar estado de la orden 
-        window.alternarEstadoOrden = async (id, estadoActual) => {
-            try {
-                const refPedido = doc(db, "pedidos", id);
-                await updateDoc(refPedido, {
-                    completada: !estadoActual
-                });
-            } catch (error) {
-                console.error("Error al actualizar la comanda:", error);
-            }
-        };
-
-        //  Eliminar comanda 
-        window.eliminarOrden = async (id) => {
-            if (confirm("¿Estás seguro de eliminar esta comanda?")) {
-                try {
-                    await deleteDoc(doc(db, "pedidos", id));
-                } catch (error) {
-                    console.error("Error al eliminar comanda:", error);
-                }
-            }
-        };
-
-        // Borrar todo el historial
-        window.limpiarTodosLosPedidos = async () => {
-            if (confirm("⚠️ ¿Deseas borrar TODOS los pedidos recibidos?")) {
-                try {
-                    const querySnapshot = await getDocs(collection(db, "pedidos"));
-                    const promesas = querySnapshot.docs.map(d => deleteDoc(doc(db, "pedidos", d.id)));
-                    await Promise.all(promesas);
-                } catch (error) {
-                    console.error("Error al limpiar historial:", error);
-                }
-            }
-        };
-    </script>
-    
+        window.limpiarTodosLosPedidos = async () => {
+            if (confirm("⚠️ ¿Deseas borrar TODOS los pedidos recibidos?")) {
+                try {
+                    const querySnapshot = await getDocs(collection(db, "pedidos"));
+                    const promesas = querySnapshot.docs.map(d => deleteDoc(doc(db, "pedidos", d.id)));
+                    await Promise.all(promesas);
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        };
+    </script>
+    
 </body>
 </html>
 
-este es mi admin que le coloco o q
+```
