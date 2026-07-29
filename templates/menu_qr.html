@@ -19,7 +19,6 @@
         <p class="instruccion-scroll">↔ Desliza hacia los lados para ver todas nuestras categorías</p>
         
         <div class="contenedor-horizontal">
-            
             <div class="columna-carta">
                 <h3 class="titulo-categoria">Hamburguesas</h3>
                 <div class="item-carta">
@@ -127,7 +126,6 @@
                     <button class="btn-add" onclick="agregarAlCarrito('Combo 2', 45000)">+ Agregar</button>
                 </div>
             </div>
-
         </div>
     </section>
 
@@ -234,21 +232,21 @@
                 return;
             }
 
-            const cliente = prompt("Por favor, ingresa tu Número de Mesa (o Tu Nombre):");
+            const numeroMesa = prompt("Por favor, ingresa tu Número de Mesa:");
 
-            if (cliente === null || cliente.trim() === "") {
-                alert("❌ Es necesario ingresar el número de mesa para poder enviar el pedido.");
+            if (numeroMesa === null || numeroMesa.trim() === "") {
+                alert("❌ Es necesario ingresar el número de mesa para poder procesar tu pedido.");
                 return; 
             }
 
             const btnSubmit = document.querySelector('.btn-submit-order');
-            btnSubmit.innerText = "Enviando...";
+            btnSubmit.innerText = "Enviando a cocina...";
             btnSubmit.disabled = true;
 
             const nuevoPedido = {
-                cliente: cliente.trim(),
+                cliente: `Mesa ${numeroMesa.trim()}`,
                 items: carrito,
-                total: carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0),
+                total: carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0),
                 completada: false,
                 timestamp: serverTimestamp()
             };
@@ -260,8 +258,8 @@
                 actualizarInterfazCarrito();
                 window.toggleCarrito();
             } catch (error) {
-                console.error("Error al enviar pedido:", error);
-                alert("❌ Hubo un error al enviar tu pedido. Revisa tu conexión.");
+                console.error("Error al enviar el pedido:", error);
+                alert("❌ Hubo un error al enviar tu pedido. Verifica tu conexión a internet.");
             } finally {
                 btnSubmit.innerText = "Enviar Pedido al Admin";
                 btnSubmit.disabled = false;
