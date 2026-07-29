@@ -37,7 +37,6 @@
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
         import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-        // Autenticación 
         onAuthStateChanged(auth, (usuario) => {
             if (!usuario) {
                 alert("Acceso denegado. Debes iniciar sesión como administrador.");
@@ -45,24 +44,12 @@
             }
         });
 
-        // Cerrar sesión
         window.cerrarSesion = () => {
             signOut(auth).then(() => {
                 window.location.href = "../index.html";
             });
         };
 
-        import { auth } from "./controllers/firebase-config.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-
-        onAuthStateChanged(auth, (user) => {
-          if (!user) {
-            // Si no hay usuario
-            window.location.href = "acceso.html";
-          }
-        });
-
-        // Reloj 
         function actualizarReloj() {
             const ahora = new Date();
             document.getElementById('reloj').innerText = ahora.toLocaleTimeString();
@@ -70,7 +57,6 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
-        //  Escuchar pedidos en tiempo real desde Firestore
         const q = query(collection(db, "pedidos"), orderBy("timestamp", "desc"));
 
         onSnapshot(q, (snapshot) => {
@@ -127,9 +113,10 @@
             });
 
             contenedor.innerHTML = acumuladoHTML;
+        }, (error) => {
+            console.error(error);
         });
 
-        // Modificar estado de la orden 
         window.alternarEstadoOrden = async (id, estadoActual) => {
             try {
                 const refPedido = doc(db, "pedidos", id);
@@ -137,22 +124,20 @@
                     completada: !estadoActual
                 });
             } catch (error) {
-                console.error("Error al actualizar la comanda:", error);
+                console.error(error);
             }
         };
 
-        //  Eliminar comanda 
         window.eliminarOrden = async (id) => {
             if (confirm("¿Estás seguro de eliminar esta comanda?")) {
                 try {
                     await deleteDoc(doc(db, "pedidos", id));
                 } catch (error) {
-                    console.error("Error al eliminar comanda:", error);
+                    console.error(error);
                 }
             }
         };
 
-        // Borrar todo el historial
         window.limpiarTodosLosPedidos = async () => {
             if (confirm("⚠️ ¿Deseas borrar TODOS los pedidos recibidos?")) {
                 try {
@@ -160,7 +145,7 @@
                     const promesas = querySnapshot.docs.map(d => deleteDoc(doc(db, "pedidos", d.id)));
                     await Promise.all(promesas);
                 } catch (error) {
-                    console.error("Error al limpiar historial:", error);
+                    console.error(error);
                 }
             }
         };
