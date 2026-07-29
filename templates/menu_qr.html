@@ -14,13 +14,17 @@
         <h1 style="margin:0;">Mivith - Pedido en Mesa</h1>
     </header>
 
+    <!-- Menú Principal con Desplazamiento Horizontal -->
     <section class="seccion-carta">
         <h2>Realiza tu Pedido</h2>
         <p class="instruccion-scroll">↔ Desliza hacia los lados para ver todas nuestras categorías</p>
         
         <div class="contenedor-horizontal">
+            
+            <!-- CATEGORÍA 1: HAMBURGUESAS -->
             <div class="columna-carta">
                 <h3 class="titulo-categoria">Hamburguesas</h3>
+                
                 <div class="item-carta">
                     <div class="item-header">
                         <h4>Clásica</h4>
@@ -29,6 +33,7 @@
                     <p class="item-desc">Carne jugosa, lechuga fresca, tomate y nuestra salsa especial.</p>
                     <button class="btn-add" onclick="agregarAlCarrito('Hamburguesa Clásica', 18000)">+ Agregar</button>
                 </div>
+
                 <div class="item-carta">
                     <div class="item-header">
                         <h4>BBQ</h4>
@@ -37,6 +42,7 @@
                     <p class="item-desc">Bañada en nuestra salsa BBQ casera con cebolla caramelizada.</p>
                     <button class="btn-add" onclick="agregarAlCarrito('Hamburguesa BBQ', 22000)">+ Agregar</button>
                 </div>
+
                 <div class="item-carta">
                     <div class="item-header">
                         <h4>Doble Carne</h4>
@@ -47,8 +53,10 @@
                 </div>
             </div>
 
+            <!-- CATEGORÍA 2: PERROS & SALCHIPAPAS -->
             <div class="columna-carta">
                 <h3 class="titulo-categoria">Perros & Salchipapas</h3>
+                
                 <div class="item-carta">
                     <div class="item-header">
                         <h4>Perro Especial</h4>
@@ -57,6 +65,7 @@
                     <p class="item-desc">Con queso fundido, tocino crujiente y nuestra salsa especial.</p>
                     <button class="btn-add" onclick="agregarAlCarrito('Perro Especial', 16000)">+ Agregar</button>
                 </div>
+
                 <div class="item-carta">
                     <div class="item-header">
                         <h4>Perro Ranchero</h4>
@@ -65,6 +74,7 @@
                     <p class="item-desc">Huevo, champiñones y queso derretido</p>
                     <button class="btn-add" onclick="agregarAlCarrito('Perro Ranchero', 18000)">+ Agregar</button>
                 </div>
+
                 <div class="item-carta">
                     <div class="item-header">
                         <h4>Salchipapa Mixta</h4>
@@ -75,8 +85,10 @@
                 </div>
             </div>
 
+            <!-- CATEGORÍA 3: POSTRES -->
             <div class="columna-carta">
                 <h3 class="titulo-categoria">Postres</h3>
+                
                 <div class="item-carta">
                     <div class="item-header">
                         <h4>Brownie con Helado</h4>
@@ -85,6 +97,7 @@
                     <p class="item-desc">Brownie tibio con helado de vainilla artesanal.</p>
                     <button class="btn-add" onclick="agregarAlCarrito('Brownie con Helado', 12000)">+ Agregar</button>
                 </div>
+
                 <div class="item-carta">
                     <div class="item-header">
                         <h4>Cheesecake</h4>
@@ -95,8 +108,10 @@
                 </div>
             </div>
 
+            <!-- CATEGORÍA 4: BEBIDAS -->
             <div class="columna-carta">
                 <h3 class="titulo-categoria">Bebidas</h3>
+                
                 <div class="item-carta">
                     <div class="item-header">
                         <h4>Limonada de Coco</h4>
@@ -107,8 +122,10 @@
                 </div>
             </div>
 
+            <!-- CATEGORÍA 5: PROMOCIONES -->
             <div class="columna-carta">
                 <h3 class="titulo-categoria" style="color: #f1c40f;">Promociones</h3>
+                
                 <div class="item-carta">
                     <div class="item-header">
                         <h4>Combo 1</h4>
@@ -117,6 +134,7 @@
                     <p class="item-desc">4 Hamburguesas Clásicas + Gaseosa 1.5L.</p>
                     <button class="btn-add" onclick="agregarAlCarrito('Combo 1', 65000)">+ Agregar</button>
                 </div>
+
                 <div class="item-carta">
                     <div class="item-header">
                         <h4>Combo 2</h4>
@@ -126,35 +144,41 @@
                     <button class="btn-add" onclick="agregarAlCarrito('Combo 2', 45000)">+ Agregar</button>
                 </div>
             </div>
+
         </div>
     </section>
 
+    <!-- Botón Flotante del Carrito -->
     <div class="cart-float-btn" onclick="toggleCarrito()">
         🛒 Pedido (<span id="cart-count">0</span>) | $<span id="cart-float-total">0</span>
     </div>
 
+    <!-- Panel Lateral del Carrito -->
     <div class="cart-sidebar" id="cart-sidebar">
         <div class="cart-header">
             <h3 style="margin: 0;">Tu Pedido</h3>
             <button class="cart-close" onclick="toggleCarrito()">&times;</button>
         </div>
+        
         <div class="cart-items" id="cart-items">
             <p style="color: #666; text-align: center;">Tu pedido está vacío.</p>
         </div>
+
         <div class="cart-footer">
             <h4 style="margin: 0; font-size: 1.1rem;">Total: $<span id="cart-total">0</span> COP</h4>
-            <button class="btn-submit-order" id="btnEnviarPedido">Enviar Pedido al Admin</button>
+            <button class="btn-submit-order" onclick="enviarPedidoAlAdmin()">Enviar Pedido al Admin</button>
         </div>
     </div>
 
+    <!-- Lógica JavaScript del Carrito -->
     <script>
         let carrito = [];
 
-        window.toggleCarrito = function() {
+        function toggleCarrito() {
             document.getElementById('cart-sidebar').classList.toggle('active');
-        };
+        }
 
-        window.agregarAlCarrito = function(nombre, precio) {
+        function agregarAlCarrito(nombre, precio) {
             const itemExistente = carrito.find(item => item.nombre === nombre);
             if (itemExistente) {
                 itemExistente.cantidad++;
@@ -163,9 +187,9 @@
             }
             actualizarInterfazCarrito();
             document.getElementById('cart-sidebar').classList.add('active');
-        };
+        }
 
-        window.cambiarCantidad = function(nombre, cambio) {
+        function cambiarCantidad(nombre, cambio) {
             const item = carrito.find(i => i.nombre === nombre);
             if (item) {
                 item.cantidad += cambio;
@@ -174,7 +198,7 @@
                 }
             }
             actualizarInterfazCarrito();
-        };
+        }
 
         function actualizarInterfazCarrito() {
             const contenedorItems = document.getElementById('cart-items');
@@ -220,55 +244,14 @@
             floatTotalElemento.innerText = totalFormateado;
             contadorElemento.innerText = totalCantidad;
         }
-    </script>
 
-    <script type="module">
-        import { db } from '../controllers/firebase-config.js';
-        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-        document.getElementById('btnEnviarPedido').addEventListener('click', async function() {
+        function enviarPedidoAlAdmin() {
             if (carrito.length === 0) {
-                alert("🛒 Selecciona al menos un producto para realizar tu pedido.");
+                alert("Tu pedido está vacío.");
                 return;
             }
-
-            const confirmacion = confirm("¿Estás seguro de enviar tu pedido a la cocina?");
-            if (!confirmacion) {
-                return;
-            }
-
-            const numeroMesa = prompt("Por favor, ingresa tu Número de Mesa:");
-            if (numeroMesa === null || numeroMesa.trim() === "") {
-                alert("❌ Es necesario ingresar el número de mesa para poder procesar tu pedido.");
-                return; 
-            }
-
-            const btnSubmit = document.getElementById('btnEnviarPedido');
-            btnSubmit.innerText = "Enviando a cocina...";
-            btnSubmit.disabled = true;
-
-            const nuevoPedido = {
-                cliente: `Mesa ${numeroMesa.trim()}`,
-                items: carrito,
-                total: carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0),
-                completada: false,
-                timestamp: serverTimestamp()
-            };
-
-            try {
-                await addDoc(collection(db, "pedidos"), nuevoPedido);
-                alert("✅ ¡Tu pedido ha sido enviado con éxito a la cocina!");
-                carrito = [];
-                actualizarInterfazCarrito();
-                window.toggleCarrito();
-            } catch (error) {
-                console.error("Error al enviar el pedido:", error);
-                alert("❌ Hubo un error al enviar tu pedido. Verifica tu conexión a internet.");
-            } finally {
-                btnSubmit.innerText = "Enviar Pedido al Admin";
-                btnSubmit.disabled = false;
-            }
-        });
+            alert("¡Pedido enviado con éxito! (En el siguiente paso conectaremos esto con la base de datos en tiempo real)");
+        }
     </script>
 </body>
 </html>
