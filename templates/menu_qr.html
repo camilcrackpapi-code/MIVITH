@@ -143,7 +143,7 @@
         </div>
         <div class="cart-footer">
             <h4 style="margin: 0; font-size: 1.1rem;">Total: $<span id="cart-total">0</span> COP</h4>
-            <button class="btn-submit-order" onclick="enviarPedidoAlAdmin()">Enviar Pedido al Admin</button>
+            <button class="btn-submit-order" id="btnEnviarPedido">Enviar Pedido al Admin</button>
         </div>
     </div>
 
@@ -226,20 +226,24 @@
         import { db } from '../controllers/firebase-config.js';
         import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        window.enviarPedidoAlAdmin = async function() {
+        document.getElementById('btnEnviarPedido').addEventListener('click', async function() {
             if (carrito.length === 0) {
                 alert("🛒 Selecciona al menos un producto para realizar tu pedido.");
                 return;
             }
 
-            const numeroMesa = prompt("Por favor, ingresa tu Número de Mesa:");
+            const confirmacion = confirm("¿Estás seguro de enviar tu pedido a la cocina?");
+            if (!confirmacion) {
+                return;
+            }
 
+            const numeroMesa = prompt("Por favor, ingresa tu Número de Mesa:");
             if (numeroMesa === null || numeroMesa.trim() === "") {
                 alert("❌ Es necesario ingresar el número de mesa para poder procesar tu pedido.");
                 return; 
             }
 
-            const btnSubmit = document.querySelector('.btn-submit-order');
+            const btnSubmit = document.getElementById('btnEnviarPedido');
             btnSubmit.innerText = "Enviando a cocina...";
             btnSubmit.disabled = true;
 
@@ -264,7 +268,7 @@
                 btnSubmit.innerText = "Enviar Pedido al Admin";
                 btnSubmit.disabled = false;
             }
-        };
+        });
     </script>
 </body>
 </html>
