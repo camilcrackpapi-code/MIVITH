@@ -1,276 +1,27 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú QR - Mivith</title>
-    <link rel="stylesheet" href="../css/global.css">
-    <link rel="stylesheet" href="../css/menu.css">
-    <link rel="stylesheet" href="../css/menu_qr.css">
-</head>
-<body>
-
-    <header style="text-align: center; padding: 15px 0;">
-        <h1 style="margin:0;">Mivith - Pedido en Mesa</h1>
-    </header>
-
-    <!-- Menú Principal con Desplazamiento Horizontal -->
-    <section class="seccion-carta">
-        <h2>Realiza tu Pedido</h2>
-        <p class="instruccion-scroll">↔ Desliza hacia los lados para ver todas nuestras categorías</p>
-        
-        <div class="contenedor-horizontal">
-            
-            <!-- CATEGORÍA 1: HAMBURGUESAS -->
-            <div class="columna-carta">
-                <h3 class="titulo-categoria">Hamburguesas</h3>
-                
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Clásica</h4>
-                        <span class="item-precio">$18.000</span>
-                    </div>
-                    <p class="item-desc">Carne jugosa, lechuga fresca, tomate y nuestra salsa especial.</p>
-                    <button class="btn-add" onclick="agregarAlCarrito('Hamburguesa Clásica', 18000)">+ Agregar</button>
-                </div>
-
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>BBQ</h4>
-                        <span class="item-precio">$22.000</span>
-                    </div>
-                    <p class="item-desc">Bañada en nuestra salsa BBQ casera con cebolla caramelizada.</p>
-                    <button class="btn-add" onclick="agregarAlCarrito('Hamburguesa BBQ', 22000)">+ Agregar</button>
-                </div>
-
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Doble Carne</h4>
-                        <span class="item-precio">$26.000</span>
-                    </div>
-                    <p class="item-desc">Doble de sabor, doble de satisfacción. Dos carnes jugosas con queso fundido.</p>
-                    <button class="btn-add" onclick="agregarAlCarrito('Hamburguesa Doble Carne', 26000)">+ Agregar</button>
-                </div>
-            </div>
-
-            <!-- CATEGORÍA 2: PERROS & SALCHIPAPAS -->
-            <div class="columna-carta">
-                <h3 class="titulo-categoria">Perros & Salchipapas</h3>
-                
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Perro Especial</h4>
-                        <span class="item-precio">$16.000</span>
-                    </div>
-                    <p class="item-desc">Con queso fundido, tocino crujiente y nuestra salsa especial.</p>
-                    <button class="btn-add" onclick="agregarAlCarrito('Perro Especial', 16000)">+ Agregar</button>
-                </div>
-
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Perro Ranchero</h4>
-                        <span class="item-precio">$18.000</span>
-                    </div>
-                    <p class="item-desc">Huevo, champiñones y queso derretido</p>
-                    <button class="btn-add" onclick="agregarAlCarrito('Perro Ranchero', 18000)">+ Agregar</button>
-                </div>
-
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Salchipapa Mixta</h4>
-                        <span class="item-precio">$24.000</span>
-                    </div>
-                    <p class="item-desc">La más completa: salchicha, carne, queso, huevo y acompañamientos.</p>
-                    <button class="btn-add" onclick="agregarAlCarrito('Salchipapa Mixta', 24000)">+ Agregar</button>
-                </div>
-            </div>
-
-            <!-- CATEGORÍA 3: POSTRES -->
-            <div class="columna-carta">
-                <h3 class="titulo-categoria">Postres</h3>
-                
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Brownie con Helado</h4>
-                        <span class="item-precio">$12.000</span>
-                    </div>
-                    <p class="item-desc">Brownie tibio con helado de vainilla artesanal.</p>
-                    <button class="btn-add" onclick="agregarAlCarrito('Brownie con Helado', 12000)">+ Agregar</button>
-                </div>
-
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Cheesecake</h4>
-                        <span class="item-precio">$12.000</span>
-                    </div>
-                    <p class="item-desc">Cremoso, suave y con un toque de limón. Receta casera.</p>
-                    <button class="btn-add" onclick="agregarAlCarrito('Cheesecake', 12000)">+ Agregar</button>
-                </div>
-            </div>
-
-            <!-- CATEGORÍA 4: BEBIDAS -->
-            <div class="columna-carta">
-                <h3 class="titulo-categoria">Bebidas</h3>
-                
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Limonada de Coco</h4>
-                        <span class="item-precio">$10.000</span>
-                    </div>
-                    <p class="item-desc">Nuestra especialidad. Cremosa, refrescante y única en Mivith.</p>
-                    <button class="btn-add" onclick="agregarAlCarrito('Limonada de Coco', 10000)">+ Agregar</button>
-                </div>
-            </div>
-
-            <!-- CATEGORÍA 5: PROMOCIONES -->
-            <div class="columna-carta">
-                <h3 class="titulo-categoria" style="color: #f1c40f;">Promociones</h3>
-                
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Combo 1</h4>
-                        <span class="item-precio">$65.000</span>
-                    </div>
-                    <p class="item-desc">4 Hamburguesas Clásicas + Gaseosa 1.5L.</p>
-                    <button class="btn-add" onclick="agregarAlCarrito('Combo 1', 65000)">+ Agregar</button>
-                </div>
-
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Combo 2</h4>
-                        <span class="item-precio">$45.000</span>
-                    </div>
-                    <p class="item-desc">2 Hamburguesas Clásicas + 2 Papas + Gaseosa 1L.</p>
-                    <button class="btn-add" onclick="agregarAlCarrito('Combo 2', 45000)">+ Agregar</button>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Botón Flotante del Carrito -->
-    <div class="cart-float-btn" onclick="toggleCarrito()">
-        🛒 Pedido (<span id="cart-count">0</span>) | $<span id="cart-float-total">0</span>
-    </div>
-
-    <!-- Panel Lateral del Carrito -->
-    <div class="cart-sidebar" id="cart-sidebar">
-        <div class="cart-header">
-            <h3 style="margin: 0;">Tu Pedido</h3>
-            <button class="cart-close" onclick="toggleCarrito()">&times;</button>
-        </div>
-        
-        <div class="cart-items" id="cart-items">
-            <p style="color: #666; text-align: center;">Tu pedido está vacío.</p>
-        </div>
-
-        <div class="cart-footer">
-            <h4 style="margin: 0; font-size: 1.1rem;">Total: $<span id="cart-total">0</span> COP</h4>
-            <button class="btn-submit-order" id="btnEnviarPedido">Enviar Pedido al Admin</button>
-        </div>
-    </div>
-
-    <!-- Lógica del Carrito de Compras -->
-    <script>
-        let carrito = [];
-
-        function toggleCarrito() {
-            document.getElementById('cart-sidebar').classList.toggle('active');
-        }
-
-        function agregarAlCarrito(nombre, precio) {
-            const itemExistente = carrito.find(item => item.nombre === nombre);
-            if (itemExistente) {
-                itemExistente.cantidad++;
-            } else {
-                carrito.push({ nombre, precio, cantidad: 1 });
-            }
-            actualizarInterfazCarrito();
-            document.getElementById('cart-sidebar').classList.add('active');
-        }
-
-        function cambiarCantidad(nombre, cambio) {
-            const item = carrito.find(i => i.nombre === nombre);
-            if (item) {
-                item.cantidad += cambio;
-                if (item.cantidad <= 0) {
-                    carrito = carrito.filter(i => i.nombre !== nombre);
-                }
-            }
-            actualizarInterfazCarrito();
-        }
-
-        function actualizarInterfazCarrito() {
-            const contenedorItems = document.getElementById('cart-items');
-            const totalElemento = document.getElementById('cart-total');
-            const floatTotalElemento = document.getElementById('cart-float-total');
-            const contadorElemento = document.getElementById('cart-count');
-
-            if (carrito.length === 0) {
-                contenedorItems.innerHTML = '<p style="color: #666; text-align: center;">Tu pedido está vacío.</p>';
-                totalElemento.innerText = '0';
-                floatTotalElemento.innerText = '0';
-                contadorElemento.innerText = '0';
-                return;
-            }
-
-            contenedorItems.innerHTML = '';
-            let total = 0;
-            let totalCantidad = 0;
-
-            carrito.forEach(item => {
-                const subtotal = item.precio * item.cantidad;
-                total += subtotal;
-                totalCantidad += item.cantidad;
-
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'cart-item';
-                itemDiv.innerHTML = `
-                    <div>
-                        <strong>${item.nombre}</strong><br>
-                        <small style="color:#666;">$${item.precio.toLocaleString('es-CO')} c/u</small>
-                    </div>
-                    <div class="cart-item-controls">
-                        <button onclick="cambiarCantidad('${item.nombre}', -1)">-</button>
-                        <span style="margin: 0 5px; font-weight:bold;">${item.cantidad}</span>
-                        <button onclick="cambiarCantidad('${item.nombre}', 1)">+</button>
-                    </div>
-                `;
-                contenedorItems.appendChild(itemDiv);
-            });
-
-            const totalFormateado = total.toLocaleString('es-CO');
-            totalElemento.innerText = totalFormateado;
-            floatTotalElemento.innerText = totalFormateado;
-            contadorElemento.innerText = totalCantidad;
-        }
-    </script>
-
-    <!-- Conexión con Firebase Firestore -->
+<!-- Conexión con Firebase Firestore -->
     <script type="module">
         import { db } from '../controllers/firebase-config.js';
         import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-        document.getElementById('btnEnviarPedido').addEventListener('click', async function() {
+        const btnEnviar = document.getElementById('btnEnviarPedido');
+
+        btnEnviar.addEventListener('click', async () => {
             if (carrito.length === 0) {
                 alert("Tu pedido está vacío.");
                 return;
             }
 
             const confirmar = confirm("¿Deseas enviar tu pedido?");
-            if (!confirmar) {
-                return;
-            }
+            if (!confirmar) return;
 
-            const numeroMesa = prompt("Por favor, ingresa tu número de Mesa o Nombre:");
-            if (numeroMesa === null || numeroMesa.trim() === "") {
+            const numeroMesa = prompt("Por favor, ingresa tu Número de Mesa o Nombre:");
+            if (!numeroMesa || numeroMesa.trim() === "") {
                 alert("❌ Es necesario ingresar tu mesa o nombre para procesar el pedido.");
                 return;
             }
 
-            const btnSubmit = document.getElementById('btnEnviarPedido');
-            btnSubmit.innerText = "Enviando...";
-            btnSubmit.disabled = true;
+            btnEnviar.innerText = "Enviando...";
+            btnEnviar.disabled = true;
 
             const totalCalculado = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
 
@@ -283,19 +34,17 @@
                     timestamp: serverTimestamp()
                 });
 
-                alert("¡Pedido enviado con éxito!");
+                alert("¡Pedido enviado con éxito a la cocina!");
                 carrito = [];
                 actualizarInterfazCarrito();
                 toggleCarrito();
+
             } catch (error) {
-                console.error("Error al enviar pedido a Firebase:", error);
-                alert("❌ Ocurrió un error al enviar tu pedido. Por favor intenta de nuevo.");
+                console.error("Error al enviar pedido:", error);
+                alert("❌ Error al enviar el pedido: " + error.message);
             } finally {
-                btnSubmit.innerText = "Enviar Pedido al Admin";
-                btnSubmit.disabled = false;
+                btnEnviar.innerText = "Enviar Pedido al Admin";
+                btnEnviar.disabled = false;
             }
         });
     </script>
-
-</body>
-</html>
