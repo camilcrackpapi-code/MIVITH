@@ -262,7 +262,15 @@
             const confirmar = confirm("¿Deseas enviar tu pedido a la cocina?");
             if (!confirmar) return;
 
-            const numeroMesa = prompt("Por favor, ingresa tu Número de Mesa :");
+            // --- LÓGICA: Detectar mesa por URL o pedirla manualmente ---
+            const params = new URLSearchParams(window.location.search);
+            let numeroMesa = params.get('mesa'); 
+
+            // Si no hay parámetro ?mesa=X en la URL, solicitamos manualmente
+            if (!numeroMesa || numeroMesa.trim() === "") {
+                numeroMesa = prompt("No detectamos mesa, por favor ingrésala (ej: 1):");
+            }
+
             if (!numeroMesa || numeroMesa.trim() === "") {
                 alert("❌ Es necesario ingresar la mesa para procesar el pedido.");
                 return;
