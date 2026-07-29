@@ -11,7 +11,7 @@
 <body>
 
     <header style="text-align: center; padding: 15px 0;">
-        <h1 style="margin:0;">Mivith - Pedido en Mesa <span id="numero-mesa-titulo"></span></h1>
+        <h1 style="margin:0;">Mivith - Pedido en Mesa</h1>
     </header>
 
     <section class="seccion-carta">
@@ -152,13 +152,6 @@
     <script>
         let carrito = [];
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const mesaQR = urlParams.get('mesa');
-        
-        if (mesaQR) {
-            document.getElementById('numero-mesa-titulo').innerText = "(Mesa " + mesaQR + ")";
-        }
-
         window.toggleCarrito = function() {
             document.getElementById('cart-sidebar').classList.toggle('active');
         };
@@ -241,11 +234,10 @@
                 return;
             }
 
-            let nombrePorDefecto = mesaQR ? `Mesa ${mesaQR}` : "";
-            const cliente = prompt("Por favor, confirma tu Nombre o Número de Mesa:", nombrePorDefecto);
+            const cliente = prompt("Por favor, ingresa tu Número de Mesa (o Tu Nombre):");
 
             if (cliente === null || cliente.trim() === "") {
-                alert("❌ El envío del pedido fue cancelado.");
+                alert("❌ Es necesario ingresar el número de mesa para poder enviar el pedido.");
                 return; 
             }
 
