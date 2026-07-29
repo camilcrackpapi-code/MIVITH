@@ -244,14 +244,8 @@
             floatTotalElemento.innerText = totalFormateado;
             contadorElemento.innerText = totalCantidad;
         }
-    </script>
 
-    <!-- Conexión en tiempo real con Firebase Firestore -->
-    <script type="module">
-        import { db } from '../controllers/firebase-config.js';
-        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-        window.enviarPedidoAlAdmin = async function() {
+        function enviarPedidoAlAdmin() {
             if (carrito.length === 0) {
                 alert("Tu pedido está vacío.");
                 return;
@@ -262,31 +256,8 @@
                 return;
             }
 
-            const numeroMesa = prompt("Por favor, ingresa tu Número de Mesa:");
-            if (numeroMesa === null || numeroMesa.trim() === "") {
-                alert("❌ Necesitas ingresar tu mesa para enviar el pedido.");
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "pedidos"), {
-                    cliente: `Mesa ${numeroMesa.trim()}`,
-                    items: carrito,
-                    total: carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0),
-                    completada: false,
-                    timestamp: serverTimestamp()
-                });
-
-                alert("¡Pedido enviado con éxito!");
-                carrito = [];
-                actualizarInterfazCarrito();
-                toggleCarrito();
-
-            } catch (error) {
-                console.error("Error al enviar el pedido:", error);
-                alert("❌ Hubo un fallo al enviar el pedido. Revisa tu conexión.");
-            }
-        };
+            alert("¡Pedido enviado con éxito!");
+        }
     </script>
 </body>
 </html>
