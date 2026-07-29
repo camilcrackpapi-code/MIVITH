@@ -20,7 +20,6 @@
         
         <div class="contenedor-horizontal">
             
-            <!-- HAMBURGUESAS -->
             <div class="columna-carta">
                 <h3 class="titulo-categoria">Hamburguesas</h3>
                 <div class="item-carta">
@@ -49,7 +48,6 @@
                 </div>
             </div>
 
-            <!-- PERROS CALIENTES Y SALCHIPAPAS -->
             <div class="columna-carta">
                 <h3 class="titulo-categoria">Perros & Salchipapas</h3>
                 <div class="item-carta">
@@ -78,7 +76,6 @@
                 </div>
             </div>
 
-            <!-- POSTRES -->
             <div class="columna-carta">
                 <h3 class="titulo-categoria">Postres</h3>
                 <div class="item-carta">
@@ -99,7 +96,6 @@
                 </div>
             </div>
 
-            <!-- BEBIDAS -->
             <div class="columna-carta">
                 <h3 class="titulo-categoria">Bebidas</h3>
                 <div class="item-carta">
@@ -112,7 +108,6 @@
                 </div>
             </div>
 
-            <!-- COMBOS -->
             <div class="columna-carta">
                 <h3 class="titulo-categoria" style="color: #f1c40f;">Promociones</h3>
                 <div class="item-carta">
@@ -136,12 +131,10 @@
         </div>
     </section>
 
-    <!--  Carrito -->
     <div class="cart-float-btn" onclick="toggleCarrito()">
         🛒 Pedido (<span id="cart-count">0</span>) | $<span id="cart-float-total">0</span>
     </div>
 
-    <!-- Panel Lateral del Carrito -->
     <div class="cart-sidebar" id="cart-sidebar">
         <div class="cart-header">
             <h3 style="margin: 0;">Tu Pedido</h3>
@@ -156,13 +149,9 @@
         </div>
     </div>
 
-    <script type="module">
-        import { db } from '../controllers/firebase-config.js';
-        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
+    <script>
         let carrito = [];
-        
-        // Detección del número de mesa 
+
         const urlParams = new URLSearchParams(window.location.search);
         const mesaQR = urlParams.get('mesa');
         
@@ -170,12 +159,10 @@
             document.getElementById('numero-mesa-titulo').innerText = "(Mesa " + mesaQR + ")";
         }
 
-        // abrir y cerrar el panel lateral
         window.toggleCarrito = function() {
             document.getElementById('cart-sidebar').classList.toggle('active');
         };
 
-        //  agregar productos
         window.agregarAlCarrito = function(nombre, precio) {
             const itemExistente = carrito.find(item => item.nombre === nombre);
             if (itemExistente) {
@@ -187,7 +174,6 @@
             document.getElementById('cart-sidebar').classList.add('active');
         };
 
-        //  sumar o restar cantidades dentro del carrito
         window.cambiarCantidad = function(nombre, cambio) {
             const item = carrito.find(i => i.nombre === nombre);
             if (item) {
@@ -199,7 +185,6 @@
             actualizarInterfazCarrito();
         };
 
-        // actualizar los totales y la lista visual del pedido
         function actualizarInterfazCarrito() {
             const contenedorItems = document.getElementById('cart-items');
             const totalElemento = document.getElementById('cart-total');
@@ -244,8 +229,12 @@
             floatTotalElemento.innerText = totalFormateado;
             contadorElemento.innerText = totalCantidad;
         }
+    </script>
 
-        //  procesar el envío del pedido hacia Firestore 
+    <script type="module">
+        import { db } from '../controllers/firebase-config.js';
+        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
         window.enviarPedidoAlAdmin = async function() {
             if (carrito.length === 0) {
                 alert("🛒 Selecciona al menos un producto para realizar tu pedido.");
