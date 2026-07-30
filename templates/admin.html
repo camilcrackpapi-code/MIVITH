@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
-
     <div class="sidebar">
         <h2>Mivith Admin</h2>
         <ul class="menu-lateral">
@@ -17,9 +16,7 @@
             <li onclick="cerrarSesion()">🚪 Cerrar Sesión</li>
         </ul>
     </div>
-
     <div class="main-content">
-        <!-- SECCIÓN DE ÓRDENES (COMANDAS) -->
         <div id="seccionOrdenes">
             <div class="header-panel">
                 <div>
@@ -33,8 +30,6 @@
             </div>
             <div class="ordenes-grid" id="contenedorOrdenes"></div>
         </div>
-
-        <!-- SECCIÓN DE PRODUCTOS / PROMOCIONES -->
         <div id="seccionPromociones" style="display: none;">
             <div class="header-panel">
                 <div>
@@ -42,7 +37,6 @@
                     <p style="margin: 5px 0 0 0; color: #7da0ca;">Registra o edita platos con su imagen, nombre y precio</p>
                 </div>
             </div>
-
             <div class="promociones-content" style="margin-top: 20px;">
                 <form id="formNuevoProducto" class="formulario-admin">
                     <div class="fila-producto">
@@ -52,34 +46,27 @@
                         <div class="campos-producto">
                             <label for="prodNombre">Nombre del producto</label>
                             <input type="text" id="prodNombre" placeholder="Ej. Hamburguesa Especial" required>
-                            
                             <label for="prodPrecio">Precio (COP)</label>
                             <input type="number" id="prodPrecio" placeholder="Ej. 18000" required>
-                            
                             <label for="prodUrl">URL de la imagen</label>
                             <input type="url" id="prodUrl" placeholder="https://..." required>
                         </div>
                     </div>
-                    
                     <p id="mensajeFormulario" style="display: none; padding-top: 10px; text-align: center; font-weight: bold;"></p>
-                    
-                    <!-- Contenedor de botones -->
                     <div class="acciones-formulario">
                         <button type="submit" class="btn-guardar" id="btnGuardarProd">Guardar Producto</button>
                         <button type="button" class="btn-eliminar-prod" id="btnEliminarProd" style="display: none;">🗑️ Eliminar Producto</button>
+                        <button type="button" class="btn-nuevo-prod" id="btnNuevoProd" style="display: none;">➕ Agregar Producto</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
-    <!-- SCRIPT PRINCIPAL -->
     <script type="module">
         import { auth, db } from '../controllers/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
         import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-        // === 1. AUTENTICACIÓN ===
         onAuthStateChanged(auth, (usuario) => {
             if (!usuario) {
                 alert("Acceso denegado. Debes iniciar sesión como administrador.");
@@ -93,7 +80,6 @@
             });
         };
 
-        // === 2. NAVEGACIÓN Y RELOJ ===
         window.mostrarSeccion = (seccion) => {
             const secOrdenes = document.getElementById('seccionOrdenes');
             const secPromos = document.getElementById('seccionPromociones');
@@ -120,7 +106,6 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
-        // === 3. MONITOR DE COMANDAS (ÓRDENES) ===
         const q = query(collection(db, "pedidos"), orderBy("timestamp", "desc"));
 
         onSnapshot(q, (snapshot) => {
@@ -214,16 +199,13 @@
             }
         };
 
-        // === 4. LÓGICA DEL FORMULARIO DE PRODUCTOS ===
         const inputUrl = document.getElementById('prodUrl');
         const previewImg = document.getElementById('previewImagen');
         const formNuevoProducto = document.getElementById('formNuevoProducto');
-        
-        // Botones
         const btnGuardarProd = document.getElementById('btnGuardarProd');
         const btnEliminarProd = document.getElementById('btnEliminarProd');
+        const btnNuevoProd = document.getElementById('btnNuevoProd');
 
-        // Actualizar vista previa de la imagen al escribir la URL
         inputUrl.addEventListener('input', (e) => {
             const url = e.target.value.trim();
             if (url) {
@@ -233,38 +215,37 @@
             }
         });
 
-        // 1. Al presionar "Guardar Producto"
         formNuevoProducto.addEventListener('submit', (e) => {
             e.preventDefault(); 
-
             const nuevoProducto = {
                 nombre: document.getElementById('prodNombre').value,
                 precio: parseFloat(document.getElementById('prodPrecio').value),
                 imagen: document.getElementById('prodUrl').value
             };
-
-            // Aquí guardas/actualizas los datos en tu base de datos
             console.log("Datos guardados/actualizados:", nuevoProducto);
-            
-            // Dejar la información intacta, cambiar el texto del botón y mostrar "Eliminar"
             btnGuardarProd.innerText = '✅ Guardado (Actualizar)';
             btnEliminarProd.style.display = 'block';
+            btnNuevoProd.style.display = 'block';
         });
 
-        // 2. Al presionar "Eliminar Producto"
         btnEliminarProd.addEventListener('click', () => {
             if(confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-                // Aquí iría tu lógica para borrar de la base de datos
                 console.log("Producto eliminado correctamente");
-                
-                // Limpiamos el formulario porque el producto ya no existe
                 formNuevoProducto.reset();
                 previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
-                
-                // Restauramos los botones a su estado inicial
                 btnGuardarProd.innerText = 'Guardar Producto';
                 btnEliminarProd.style.display = 'none';
+                btnNuevoProd.style.display = 'none';
             }
+        });
+
+        btnNuevoProd.addEventListener('click', () => {
+            formNuevoProducto.reset();
+            previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
+            btnGuardarProd.innerText = 'Guardar Producto';
+            btnEliminarProd.style.display = 'none';
+            btnNuevoProd.style.display = 'none';
+            document.getElementById('prodNombre').focus();
         });
     </script>
 </body>
