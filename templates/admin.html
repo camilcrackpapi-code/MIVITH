@@ -3,51 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Cocina - Mivith</title>
+    <title>Administración - Mivith</title>
     <link rel="stylesheet" href="../css/global.css">
-    <link rel="stylesheet" href="../css/admin.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f7f6; padding: 20px; }
+        .admin-nav { background: #052659; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .admin-nav button { background: none; border: none; color: white; padding: 10px 20px; cursor: pointer; font-size: 16px; border-radius: 4px; }
+        .admin-nav button.activo { background: #5483b3; font-weight: bold; }
+        .admin-nav button:hover { background: #7da0ca; }
+        .btn-cerrar { background: #c0392b !important; }
+        
+        .seccion { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .seccion.activa { display: block; }
+        
+        /* Estilos para Formularios de Producto */
+        .formulario-admin { border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9; }
+        .fila-producto { display: flex; gap: 20px; margin-bottom: 15px; }
+        .preview-img img { width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc; }
+        .campos-producto { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
+        .campos-producto input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        .acciones-formulario { display: flex; gap: 10px; }
+        
+        .btn-guardar { background: #27ae60; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
+        .btn-eliminar-prod, .btn-eliminar { background: #e74c3c; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
+        #btnAgregarNuevoFormulario { background: #2980b9; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; margin-bottom: 20px; }
+        
+        /* Estilos para Órdenes */
+        #contenedorOrdenes { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .orden-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #fff; position: relative; }
+        .orden-card.completada { opacity: 0.7; background: #e8f8f5; }
+        .cliente-tag { background: #f39c12; color: white; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+        .lista-platos { list-style: none; padding: 0; margin: 15px 0; }
+        .lista-platos li { border-bottom: 1px solid #eee; padding: 5px 0; display: flex; justify-content: space-between; }
+        .total-pedido { font-weight: bold; font-size: 1.2em; margin: 15px 0; color: #2c3e50; }
+        .btn-despachar { background: #f39c12; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; width: 100%; margin-bottom: 5px; }
+        .btn-completado { background: #27ae60; }
+    </style>
 </head>
 <body>
-    <div class="sidebar">
-        <h2>Mivith Admin</h2>
-        <ul class="menu-lateral">
-            <li id="btnMenuOrdenes" class="activo" onclick="mostrarSeccion('ordenes')">🔔 Órdenes Activas</li>
-            <li id="btnMenuPromos" onclick="mostrarSeccion('promociones')">🏷️ Productos / Promos</li>
-            <li onclick="cerrarSesion()">🚪 Cerrar Sesión</li>
-        </ul>
-    </div>
-    <div class="main-content">
-        <div id="seccionOrdenes">
-            <div class="header-panel">
-                <div>
-                    <h1 style="margin: 0;">Monitor de Cocina (Comandas)</h1>
-                    <p style="margin: 5px 0 0 0; color: #7da0ca;">Pedidos recibidos desde el menú web en tiempo real</p>
-                </div>
-                <div style="display: flex; align-items: center; gap: 20px;">
-                    <button class="btn-limpiar-todo" onclick="limpiarTodosLosPedidos()">🗑️ Borrar Historial</button>
-                    <div class="reloj" id="reloj">--:--:--</div>
-                </div>
-            </div>
-            <div class="ordenes-grid" id="contenedorOrdenes"></div>
+
+    <div class="admin-nav">
+        <div>
+            <button id="btnMenuOrdenes" class="activo" onclick="mostrarSeccion('ordenes')">📋 Órdenes</button>
+            <button id="btnMenuPromos" onclick="mostrarSeccion('promociones')">🍔 Gestionar Productos</button>
         </div>
-        <div id="seccionPromociones" style="display: none;">
-            <div class="header-panel">
-                <div>
-                    <h1 style="margin: 0;">Gestión de Productos</h1>
-                    <p style="margin: 5px 0 0 0; color: #7da0ca;">Registra o edita platos con su imagen, nombre y precio</p>
-                </div>
-            </div>
-            <div class="promociones-content" style="margin-top: 20px;">
-                <div id="contenedorFormulariosProductos"></div>
-                <button type="button" class="btn-nuevo-prod" id="btnAgregarNuevoFormulario" style="width: 100%; max-width: 600px; margin-top: 10px;">➕ Agregar Nuevo Producto</button>
-            </div>
+        <div>
+            <span id="reloj" style="margin-right: 20px; font-weight: bold;"></span>
+            <button class="btn-cerrar" onclick="cerrarSesion()">Cerrar Sesión</button>
         </div>
     </div>
+
+    <!-- SECCIÓN DE ÓRDENES -->
+    <section id="seccionOrdenes" class="seccion activa">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Control de Pedidos</h2>
+            <button onclick="limpiarTodosLosPedidos()" class="btn-eliminar">⚠️ Limpiar Todos los Pedidos</button>
+        </div>
+        <div id="contenedorOrdenes"></div>
+    </section>
+
+    <!-- SECCIÓN DE PRODUCTOS (INDEX) -->
+    <section id="seccionPromociones" class="seccion">
+        <h2>Gestión de Combos (Página de Inicio)</h2>
+        <button id="btnAgregarNuevoFormulario">+ Agregar Nuevo Producto</button>
+        <div id="contenedorFormulariosProductos"></div>
+    </section>
+
     <script type="module">
         import { auth, db } from '../controllers/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-        import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+        import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
+        // Protección de ruta
         onAuthStateChanged(auth, (usuario) => {
             if (!usuario) {
                 alert("Acceso denegado. Debes iniciar sesión como administrador.");
@@ -68,13 +95,13 @@
             const btnPromos = document.getElementById('btnMenuPromos');
 
             if (seccion === 'ordenes') {
-                secOrdenes.style.display = 'block';
-                secPromos.style.display = 'none';
+                secOrdenes.classList.add('activa');
+                secPromos.classList.remove('activa');
                 btnOrdenes.classList.add('activo');
                 btnPromos.classList.remove('activo');
             } else if (seccion === 'promociones') {
-                secOrdenes.style.display = 'none';
-                secPromos.style.display = 'block';
+                secOrdenes.classList.remove('activa');
+                secPromos.classList.add('activa');
                 btnPromos.classList.add('activo');
                 btnOrdenes.classList.remove('activo');
             }
@@ -87,23 +114,20 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
+        // LOGICA DE PEDIDOS
         const q = query(collection(db, "pedidos"), orderBy("timestamp", "desc"));
-
         onSnapshot(q, (snapshot) => {
             const contenedor = document.getElementById('contenedorOrdenes');
-            
             if (snapshot.empty) {
                 contenedor.innerHTML = '<h3 style="color: #7da0ca; grid-column: 1/-1; text-align: center;">No hay pedidos registrados en este momento.</h3>';
                 return;
             }
 
             let acumuladoHTML = '';
-
             snapshot.forEach((docSnap) => {
                 const orden = docSnap.data();
                 const id = docSnap.id;
                 let itemsHTML = '';
-
                 const listaItems = orden.items || orden.platos || [];
                 
                 listaItems.forEach(p => {
@@ -137,75 +161,63 @@
                                 onclick="alternarEstadoOrden('${id}', ${estaCompletada})">
                             ${estaCompletada ? '✓ Completado (Deshacer)' : 'Despachar Pedido ✓'}
                         </button>
-                        <button class="btn-eliminar" onclick="eliminarOrden('${id}')">Eliminar Comanda</button>
+                        <button class="btn-eliminar" style="width: 100%" onclick="eliminarOrden('${id}')">Eliminar Comanda</button>
                     </div>
                 `;
             });
-
             contenedor.innerHTML = acumuladoHTML;
-        }, (error) => {
-            console.error(error);
         });
 
         window.alternarEstadoOrden = async (id, estadoActual) => {
-            try {
-                const refPedido = doc(db, "pedidos", id);
-                await updateDoc(refPedido, { completada: !estadoActual });
-            } catch (error) {
-                console.error(error);
-            }
+            await updateDoc(doc(db, "pedidos", id), { completada: !estadoActual });
         };
 
         window.eliminarOrden = async (id) => {
             if (confirm("¿Estás seguro de eliminar esta comanda?")) {
-                try {
-                    await deleteDoc(doc(db, "pedidos", id));
-                } catch (error) {
-                    console.error(error);
-                }
+                await deleteDoc(doc(db, "pedidos", id));
             }
         };
 
         window.limpiarTodosLosPedidos = async () => {
             if (confirm("⚠️ ¿Deseas borrar TODOS los pedidos recibidos?")) {
-                try {
-                    const querySnapshot = await getDocs(collection(db, "pedidos"));
-                    const promesas = querySnapshot.docs.map(d => deleteDoc(doc(db, "pedidos", d.id)));
-                    await Promise.all(promesas);
-                } catch (error) {
-                    console.error(error);
-                }
+                const querySnapshot = await getDocs(collection(db, "pedidos"));
+                const promesas = querySnapshot.docs.map(d => deleteDoc(doc(db, "pedidos", d.id)));
+                await Promise.all(promesas);
             }
         };
 
+        // LOGICA DE PRODUCTOS (Para el Index)
         const contenedorFormularios = document.getElementById('contenedorFormulariosProductos');
         const btnAgregarNuevoFormulario = document.getElementById('btnAgregarNuevoFormulario');
 
-        function crearFormularioProducto() {
+        function crearFormularioProducto(datosExistentes = null, idFirebase = null) {
             const div = document.createElement('div');
             div.className = 'formulario-admin';
             div.style.marginBottom = '20px';
+            
+            const nombreVal = datosExistentes ? datosExistentes.nombre : '';
+            const precioVal = datosExistentes ? datosExistentes.precio : '';
+            const imagenVal = datosExistentes ? datosExistentes.imagen : '';
+            const imgSrc = imagenVal ? imagenVal : 'https://via.placeholder.com/150?text=Vista+Previa';
             
             div.innerHTML = `
                 <form class="form-producto-dinamico">
                     <div class="fila-producto">
                         <div class="preview-img">
-                            <img class="previewImagen" src="https://via.placeholder.com/150?text=Vista+Previa" alt="Vista previa">
+                            <img class="previewImagen" src="${imgSrc}" alt="Vista previa">
                         </div>
                         <div class="campos-producto">
                             <label>Nombre del producto</label>
-                            <input type="text" class="prodNombre" placeholder="Ej. Hamburguesa Especial" required>
-                            
+                            <input type="text" class="prodNombre" value="${nombreVal}" placeholder="Ej. Hamburguesa Especial" required ${datosExistentes ? 'disabled' : ''}>
                             <label>Precio (COP)</label>
-                            <input type="number" class="prodPrecio" placeholder="Ej. 18000" required>
-                            
+                            <input type="number" class="prodPrecio" value="${precioVal}" placeholder="Ej. 18000" required ${datosExistentes ? 'disabled' : ''}>
                             <label>URL de la imagen</label>
-                            <input type="url" class="prodUrl" placeholder="https://..." required>
+                            <input type="url" class="prodUrl" value="${imagenVal}" placeholder="https://..." required ${datosExistentes ? 'disabled' : ''}>
                         </div>
                     </div>
                     <div class="acciones-formulario">
-                        <button type="submit" class="btn-guardar btnGuardarProd">Guardar Producto</button>
-                        <button type="button" class="btn-eliminar-prod btnEliminarProd" style="display: none;">🗑️ Eliminar Producto</button>
+                        ${!datosExistentes ? '<button type="submit" class="btn-guardar btnGuardarProd">Guardar Producto</button>' : ''}
+                        <button type="button" class="btn-eliminar-prod btnEliminarProd" ${!datosExistentes ? 'style="display: none;"' : ''}>🗑️ Eliminar Producto</button>
                     </div>
                 </form>
             `;
@@ -218,46 +230,68 @@
             const btnGuardar = div.querySelector('.btnGuardarProd');
             const btnEliminar = div.querySelector('.btnEliminarProd');
             const inputs = div.querySelectorAll('input');
+            let productoIdFirebase = idFirebase; 
 
-            inputUrl.addEventListener('input', (e) => {
-                const url = e.target.value.trim();
-                if (url) {
-                    previewImg.src = url;
-                } else {
-                    previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
-                }
-            });
+            if (!datosExistentes) {
+                inputUrl.addEventListener('input', (e) => {
+                    const url = e.target.value.trim();
+                    if (url) {
+                        previewImg.src = url;
+                    } else {
+                        previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
+                    }
+                });
 
-            form.addEventListener('submit', (e) => {
-                e.preventDefault(); 
-                
-                const nuevoProducto = {
-                    nombre: div.querySelector('.prodNombre').value,
-                    precio: parseFloat(div.querySelector('.prodPrecio').value),
-                    imagen: div.querySelector('.prodUrl').value
-                };
-                
-                console.log("Producto capturado:", nuevoProducto);
-                
-                inputs.forEach(input => input.disabled = true);
-                
-                btnGuardar.innerText = '✅ Producto Guardado';
-                btnGuardar.disabled = true;
-                btnEliminar.style.display = 'block';
-            });
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault(); 
+                    const nuevoProducto = {
+                        nombre: div.querySelector('.prodNombre').value,
+                        precio: parseFloat(div.querySelector('.prodPrecio').value),
+                        imagen: div.querySelector('.prodUrl').value
+                    };
+                    
+                    btnGuardar.innerText = 'Guardando...';
+                    btnGuardar.disabled = true;
 
-            btnEliminar.addEventListener('click', () => {
-                if(confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                    try {
+                        const docRef = await addDoc(collection(db, "productos"), nuevoProducto);
+                        productoIdFirebase = docRef.id;
+                        inputs.forEach(input => input.disabled = true);
+                        btnGuardar.style.display = 'none';
+                        btnEliminar.style.display = 'block';
+                    } catch (error) {
+                        alert("Error al guardar el producto.");
+                        btnGuardar.innerText = 'Guardar Producto';
+                        btnGuardar.disabled = false;
+                    }
+                });
+            }
+
+            btnEliminar.addEventListener('click', async () => {
+                if(confirm('¿Estás seguro de que quieres eliminar este producto del Inicio?')) {
+                    if (productoIdFirebase) {
+                        await deleteDoc(doc(db, "productos", productoIdFirebase));
+                    }
                     div.remove();
                 }
             });
-            
-            div.querySelector('.prodNombre').focus();
         }
 
-        btnAgregarNuevoFormulario.addEventListener('click', crearFormularioProducto);
+        btnAgregarNuevoFormulario.addEventListener('click', () => crearFormularioProducto(null, null));
+        
+        // Cargar productos existentes al abrir el admin
+        const cargarProductosExistentes = async () => {
+            const querySnapshot = await getDocs(collection(db, "productos"));
+            querySnapshot.forEach((docSnap) => {
+                crearFormularioProducto(docSnap.data(), docSnap.id);
+            });
+            if(querySnapshot.empty) {
+                crearFormularioProducto(null, null);
+            }
+        };
+        
+        cargarProductosExistentes();
 
-        crearFormularioProducto();
     </script>
 </body>
 </html>
