@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
-
     <header>
         <h1>Mivith</h1>
         <nav>
@@ -30,37 +29,14 @@
         <h2>Nuestros Combos</h2>
         <p>Las mejores opciones para compartir y ahorrar</p>
         
-        <div class="menu-grid">
-            <div class="plato">
-                <img src="https://images.unsplash.com/photo-1594212202941-69234857c0e9?auto=format&fit=crop&w=800&q=80" alt="Combo 1" class="img-combo">
-                <h3>Combo 1</h3>
-                <p>4 Hamburguesas Clásicas<br>Gaseosa 1.5L</p>
-                <p class="precio">$65.000 COP</p>
-            </div>
-            <div class="plato">
-                <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80" alt="Combo 2" class="img-combo">
-                <h3>Combo 2</h3>
-                <p>2 Hamburguesas Clásicas<br>2 Papas + Gaseosa 1L</p>
-                <p class="precio">$45.000 COP</p>
-            </div>
-            <div class="plato">
-                <img src="https://images.unsplash.com/photo-1605040683050-717013ba0d6b?auto=format&fit=crop&w=800&q=80" alt="Combo 3" class="img-combo">
-                <h3>Combo 3</h3>
-                <p>1 Hamburguesa Especial<br>1 Perro Clásico<br>2 Papas + Gaseosa 1L</p>
-                <p class="precio">$35.000 COP</p>
-            </div>
-            <div class="plato">
-                <img src="https://images.unsplash.com/photo-1610440042657-612c34d95e9f?auto=format&fit=crop&w=800&q=80" alt="Combo 4" class="img-combo">
-                <h3>Combo 4</h3>
-                <p>2 Hamburguesas<br>2 Perros Especiales<br>2 Papas + Gaseosa 1.5L</p>
-                <p class="precio">$68.000 COP</p>
-            </div>
-        </div>
+        <!-- Contenedor dinámico de combos -->
+        <div class="menu-grid" id="contenedorCombos"></div>
         
         <div style="text-align: center; margin-top: 30px;">
             <a href="templates/menu.html" class="btn">Ver Menú Completo</a>
         </div>
     </section>
+
     <footer class="site-footer">
         <div class="footer-container">
             <div class="footer-col">
@@ -91,7 +67,6 @@
         </div>
     </footer>
 
-<!-- Botón circular flotante para acceso Admin -->
     <a href="templates/acceso.html" class="btn-flotante-admin" title="Acceso Administración">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -99,5 +74,37 @@
         </svg>
     </a>
 
+    <!-- SCRIPT PARA CARGAR PRODUCTOS DESDE FIREBASE -->
+    <script type="module">
+        import { db } from './controllers/firebase-config.js';
+        import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+        const contenedorCombos = document.getElementById('contenedorCombos');
+
+        onSnapshot(collection(db, "productos"), (snapshot) => {
+            if (snapshot.empty) {
+                contenedorCombos.innerHTML = '<p style="grid-column: 1/-1; color: #555;">Aún no hay combos registrados.</p>';
+                return;
+            }
+
+            let html = '';
+            snapshot.forEach(doc => {
+                const producto = doc.data();
+                const precioF = producto.precio ? producto.precio.toLocaleString('es-CO') : '0';
+                
+                html += `
+                    <div class="plato">
+                        <img src="${producto.imagen}" alt="${producto.nombre}" class="img-combo">
+                        <h3>${producto.nombre}</h3>
+                        <p class="precio">$${precioF} COP</p>
+                    </div>
+                `;
+            });
+            
+            contenedorCombos.innerHTML = html;
+        }, (error) => {
+            console.error("Error al cargar productos:", error);
+        });
+    </script>
 </body>
 </html>
