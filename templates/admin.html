@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Cocina - Mivith</title>
+    <!-- Asegúrate de que las rutas a tus CSS sean correctas -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/admin.css">
 </head>
@@ -13,12 +14,13 @@
         <h2>Mivith Admin</h2>
         <ul class="menu-lateral">
             <li id="btnMenuOrdenes" class="activo" onclick="mostrarSeccion('ordenes')">🔔 Órdenes Activas</li>
-            <li id="btnMenuPromos" onclick="mostrarSeccion('promociones')">🏷️ Promociones</li>
+            <li id="btnMenuPromos" onclick="mostrarSeccion('promociones')">🏷️ Productos / Promos</li>
             <li onclick="cerrarSesion()">🚪 Cerrar Sesión</li>
         </ul>
     </div>
 
     <div class="main-content">
+        <!-- SECCIÓN DE ÓRDENES (COMANDAS) -->
         <div id="seccionOrdenes">
             <div class="header-panel">
                 <div>
@@ -30,29 +32,50 @@
                     <div class="reloj" id="reloj">--:--:--</div>
                 </div>
             </div>
-
             <div class="ordenes-grid" id="contenedorOrdenes"></div>
         </div>
 
+        <!-- SECCIÓN DE PRODUCTOS / PROMOCIONES -->
         <div id="seccionPromociones" style="display: none;">
             <div class="header-panel">
                 <div>
-                    <h1 style="margin: 0;">Gestión de Promociones</h1>
-                    <p style="margin: 5px 0 0 0; color: #7da0ca;">Administra los combos y promociones activos para el menú</p>
+                    <h1 style="margin: 0;">Gestión de Productos</h1>
+                    <p style="margin: 5px 0 0 0; color: #7da0ca;">Registra un nuevo plato con su imagen, nombre y precio</p>
                 </div>
             </div>
 
             <div class="promociones-content" style="margin-top: 20px;">
-                <p style="color: #052659;">Módulo de gestión de promociones listo para personalizar.</p>
+                <form id="formNuevoProducto" class="formulario-admin">
+                    <div class="fila-producto">
+                        <div class="preview-img">
+                            <img id="previewImagen" src="https://via.placeholder.com/150?text=Vista+Previa" alt="Vista previa de la imagen">
+                        </div>
+                        <div class="campos-producto">
+                            <label for="prodNombre">Nombre del producto</label>
+                            <input type="text" id="prodNombre" placeholder="Ej. Hamburguesa Especial" required>
+                            
+                            <label for="prodPrecio">Precio (COP)</label>
+                            <input type="number" id="prodPrecio" placeholder="Ej. 18000" required>
+                            
+                            <label for="prodUrl">URL de la imagen</label>
+                            <input type="url" id="prodUrl" placeholder="https://..." required>
+                        </div>
+                    </div>
+                    
+                    <p id="mensajeFormulario" style="display: none; padding-top: 10px; text-align: center; font-weight: bold;"></p>
+                    <button type="submit" class="btn-guardar">Guardar Producto</button>
+                </form>
             </div>
         </div>
     </div>
 
+    <!-- SCRIPT PRINCIPAL -->
     <script type="module">
         import { auth, db } from '../controllers/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
         import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
+        // === 1. AUTENTICACIÓN ===
         onAuthStateChanged(auth, (usuario) => {
             if (!usuario) {
                 alert("Acceso denegado. Debes iniciar sesión como administrador.");
@@ -66,6 +89,7 @@
             });
         };
 
+        // === 2. NAVEGACIÓN Y RELOJ ===
         window.mostrarSeccion = (seccion) => {
             const secOrdenes = document.getElementById('seccionOrdenes');
             const secPromos = document.getElementById('seccionPromociones');
@@ -92,6 +116,7 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
+        // === 3. MONITOR DE COMANDAS (ÓRDENES) ===
         const q = query(collection(db, "pedidos"), orderBy("timestamp", "desc"));
 
         onSnapshot(q, (snapshot) => {
@@ -149,7 +174,7 @@
 
             contenedor.innerHTML = acumuladoHTML;
         }, (error) => {
-            console.error(error);
+            console.error("Error al cargar pedidos:", error);
         });
 
         window.alternarEstadoOrden = async (id, estadoActual) => {
@@ -159,7 +184,7 @@
                     completada: !estadoActual
                 });
             } catch (error) {
-                console.error(error);
+                console.error("Error al actualizar estado:", error);
             }
         };
 
@@ -168,7 +193,7 @@
                 try {
                     await deleteDoc(doc(db, "pedidos", id));
                 } catch (error) {
-                    console.error(error);
+                    console.error("Error al eliminar:", error);
                 }
             }
         };
@@ -180,11 +205,54 @@
                     const promesas = querySnapshot.docs.map(d => deleteDoc(doc(db, "pedidos", d.id)));
                     await Promise.all(promesas);
                 } catch (error) {
-                    console.error(error);
+                    console.error("Error al limpiar historial:", error);
                 }
             }
         };
+
+        // === 4. LÓGICA DEL FORMULARIO DE PRODUCTOS ===
+        const inputUrl = document.getElementById('prodUrl');
+        const previewImg = document.getElementById('previewImagen');
+        const formNuevoProducto = document.getElementById('formNuevoProducto');
+        const mensaje = document.getElementById('mensajeFormulario');
+
+        // Actualizar vista previa de la imagen al escribir la URL
+        inputUrl.addEventListener('input', (e) => {
+            const url = e.target.value.trim();
+            if (url) {
+                previewImg.src = url;
+            } else {
+                previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
+            }
+        });
+
+        // Manejar el envío del formulario
+        formNuevoProducto.addEventListener('submit', (e) => {
+            e.preventDefault(); // Evita que la página se recargue
+
+            const nuevoProducto = {
+                nombre: document.getElementById('prodNombre').value,
+                precio: parseFloat(document.getElementById('prodPrecio').value),
+                imagen: document.getElementById('prodUrl').value
+            };
+
+            // Aquí tienes los datos guardados en la variable 'nuevoProducto' listos para usarse
+            console.log("Datos capturados:", nuevoProducto);
+            
+            // Mostrar mensaje de éxito temporal
+            mensaje.style.display = 'block';
+            mensaje.style.color = '#27ae60';
+            mensaje.innerText = `¡Plato "${nuevoProducto.nombre}" capturado correctamente!`;
+            
+            // Ocultar el mensaje después de 4 segundos
+            setTimeout(() => {
+                mensaje.style.display = 'none';
+            }, 4000);
+            
+            // Limpiar el formulario y resetear la imagen
+            formNuevoProducto.reset();
+            previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
+        });
     </script>
-    
 </body>
 </html>
