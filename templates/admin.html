@@ -4,57 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administración - Mivith</title>
+    <!-- Enlace al CSS global -->
     <link rel="stylesheet" href="../css/global.css">
+    <!-- Enlace al CSS específico del Admin -->
     <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
 
-    <!-- Barra de Navegación -->
     <div class="admin-nav">
         <div class="nav-left">
-            <button class="activo">📄 Órdenes</button>
-            <button>🍔 Gestionar Productos</button>
+            <button id="btnMenuOrdenes" class="activo" onclick="mostrarSeccion('ordenes')">📄 Órdenes</button>
+            <button id="btnMenuPromos" onclick="mostrarSeccion('promociones')">🍔 Gestionar Productos</button>
         </div>
-        <div class="nav-right">
-            <span id="reloj" style="font-weight: bold;"></span>
+        <div>
+            <span id="reloj" style="margin-right: 20px; font-weight: bold;"></span>
             <button class="btn-cerrar" onclick="cerrarSesion()">Cerrar Sesión</button>
         </div>
     </div>
 
-    <!-- Contenedor Principal -->
-    <div class="admin-container">
-        <div class="header-pedidos">
+    <!-- SECCIÓN DE ÓRDENES -->
+    <section id="seccionOrdenes" class="seccion activa">
+        <div class="seccion-header">
             <h2>Control de Pedidos</h2>
             <button onclick="limpiarTodosLosPedidos()" class="btn-limpiar">⚠️ Limpiar Todos los Pedidos</button>
         </div>
-        
-        <div id="contenedorOrdenes">
-            <!-- Las tarjetas de pedidos aparecerán aquí dinámicamente -->
-        </div>
-    </div>
+        <div id="contenedorOrdenes"></div>
+    </section>
 
-    <!-- Scripts de Firebase y Lógica -->
+    <!-- SECCIÓN DE PRODUCTOS (INDEX) -->
+    <section id="seccionPromociones" class="seccion">
+        <div class="seccion-header">
+            <h2>Gestión de Combos (Página de Inicio)</h2>
+        </div>
+        <button id="btnAgregarNuevoFormulario">+ Agregar Nuevo Producto</button>
+        <div id="contenedorFormulariosProductos"></div>
+    </section>
+
     <script type="module">
         import { auth, db } from '../controllers/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-        import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+        import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-        // Proteger la ruta del administrador
+        // Protección de ruta
         onAuthStateChanged(auth, (usuario) => {
             if (!usuario) {
-                alert("Acceso denegado. Serás redirigido al inicio.");
+                alert("Acceso denegado. Debes iniciar sesión como administrador.");
                 window.location.href = "../index.html";
             }
         });
 
-        // Función para cerrar sesión
         window.cerrarSesion = () => {
             signOut(auth).then(() => {
                 window.location.href = "../index.html";
             });
         };
 
-        // Reloj en tiempo real
+        window.mostrarSeccion = (seccion) => {
+            const secOrdenes = document.getElementById('seccionOrdenes');
+            const secPromos = document.getElementById('seccionPromociones');
+            const btnOrdenes = document.getElementById('btnMenuOrdenes');
+            const btnPromos = document.getElementById('btnMenuPromos');
+
+            if (seccion === 'ordenes') {
+                secOrdenes.classList.add('activa');
+                secPromos.classList.remove('activa');
+                btnOrdenes.classList.add('activo');
+                btnPromos.classList.remove('activo');
+            } else if (seccion === 'promociones') {
+                secOrdenes.classList.remove('activa');
+                secPromos.classList.add('activa');
+                btnPromos.classList.add('activo');
+                btnOrdenes.classList.remove('activo');
+            }
+        };
+
         function actualizarReloj() {
             const ahora = new Date();
             document.getElementById('reloj').innerText = ahora.toLocaleTimeString();
@@ -62,13 +85,12 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
-        // Escuchar y mostrar pedidos en tiempo real
+        // LOGICA DE PEDIDOS
         const q = query(collection(db, "pedidos"), orderBy("timestamp", "desc"));
         onSnapshot(q, (snapshot) => {
             const contenedor = document.getElementById('contenedorOrdenes');
-            
             if (snapshot.empty) {
-                contenedor.innerHTML = '<p style="color: #666;">No hay pedidos en este momento.</p>';
+                contenedor.innerHTML = '<p style="color: #666; grid-column: 1/-1;">No hay pedidos registrados en este momento.</p>';
                 return;
             }
 
@@ -76,33 +98,36 @@
             snapshot.forEach((docSnap) => {
                 const orden = docSnap.data();
                 const id = docSnap.id;
+                let itemsHTML = '';
+                const listaItems = orden.items || orden.platos || [];
+                
+                listaItems.forEach(p => {
+                    const cantidad = p.cantidad || p.cant || 1;
+                    const precio = p.precio ? ($${(p.precio * cantidad).toLocaleString('es-CO')}) : '';
+                    itemsHTML += <li><span>${cantidad}x ${p.nombre}</span> <small>${precio}</small></li>;
+                });
+
                 const estaCompletada = orden.completada || false;
                 const cliente = orden.cliente || 'Cliente';
-                const total = orden.total ? `$${orden.total.toLocaleString('es-CO')} COP` : '';
                 
                 let hora = 'Reciente';
                 if (orden.timestamp) {
                     hora = orden.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                } else if (orden.fecha) {
+                    hora = orden.fecha;
                 }
 
-                let itemsHTML = '';
-                const listaItems = orden.items || orden.platos || [];
-                listaItems.forEach(p => {
-                    const cantidad = p.cantidad || p.cant || 1;
-                    const precio = p.precio ? `($${(p.precio * cantidad).toLocaleString('es-CO')})` : '';
-                    itemsHTML += `<li><span>${cantidad}x ${p.nombre}</span> <small>${precio}</small></li>`;
-                });
+                const total = orden.total ? $${orden.total.toLocaleString('es-CO')} COP : '';
 
                 acumuladoHTML += `
                     <div class="orden-card ${estaCompletada ? 'completada' : ''}">
                         <div class="cliente-tag">👤 ${cliente}</div>
                         <h3 style="margin-top: 0; color: #002244;">Orden</h3>
-                        <div style="color: #666; font-size: 14px;">🕒 Recibido: ${hora}</div>
+                        <div class="cliente-info" style="color: #666; font-size: 14px;">🕒 Recibido: ${hora}</div>
                         <ul class="lista-platos">
                             ${itemsHTML}
                         </ul>
-                        ${total ? `<div class="total-pedido">Total: ${total}</div>` : ''}
-                        
+                        ${total ? <div class="total-pedido">Total: ${total}</div> : ''}
                         <button class="btn-despachar ${estaCompletada ? 'btn-completado' : ''}" 
                                 onclick="alternarEstadoOrden('${id}', ${estaCompletada})">
                             ${estaCompletada ? '✓ Completado (Deshacer)' : 'Despachar Pedido ✓'}
@@ -114,7 +139,6 @@
             contenedor.innerHTML = acumuladoHTML;
         });
 
-        // Funciones para gestionar órdenes
         window.alternarEstadoOrden = async (id, estadoActual) => {
             await updateDoc(doc(db, "pedidos", id), { completada: !estadoActual });
         };
@@ -132,6 +156,114 @@
                 await Promise.all(promesas);
             }
         };
+
+        // LOGICA DE PRODUCTOS (Para el Index)
+        const contenedorFormularios = document.getElementById('contenedorFormulariosProductos');
+        const btnAgregarNuevoFormulario = document.getElementById('btnAgregarNuevoFormulario');
+
+        function crearFormularioProducto(datosExistentes = null, idFirebase = null) {
+            const div = document.createElement('div');
+            div.className = 'formulario-admin';
+            
+            const nombreVal = datosExistentes ? datosExistentes.nombre : '';
+            const precioVal = datosExistentes ? datosExistentes.precio : '';
+            const imagenVal = datosExistentes ? datosExistentes.imagen : '';
+            const imgSrc = imagenVal ? imagenVal : 'https://via.placeholder.com/150?text=Vista+Previa';
+            
+            div.innerHTML = `
+                <form class="form-producto-dinamico">
+                    <div class="fila-producto">
+                        <div class="preview-img">
+                            <img class="previewImagen" src="${imgSrc}" alt="Vista previa">
+                        </div>
+                        <div class="campos-producto">
+                            <label style="font-size: 14px; color: #555;">Nombre del producto</label>
+                            <input type="text" class="prodNombre" value="${nombreVal}" placeholder="Ej. Combo Especial" required ${datosExistentes ? 'disabled' : ''}>
+                            
+                            <label style="font-size: 14px; color: #555; margin-top: 5px;">Precio (COP)</label>
+                            <input type="number" class="prodPrecio" value="${precioVal}" placeholder="Ej. 18000" required ${datosExistentes ? 'disabled' : ''}>
+                            
+                            <label style="font-size: 14px; color: #555; margin-top: 5px;">URL de la imagen</label>
+                            <input type="url" class="prodUrl" value="${imagenVal}" placeholder="https://..." required ${datosExistentes ? 'disabled' : ''}>
+                        </div>
+                    </div>
+                    <div class="acciones-formulario">
+                        ${!datosExistentes ? '<button type="submit" class="btn-guardar btnGuardarProd">Guardar Producto</button>' : ''}
+                        <button type="button" class="btn-eliminar-prod btnEliminarProd" ${!datosExistentes ? 'style="display: none;"' : ''}>🗑️ Eliminar Producto</button>
+                    </div>
+                </form>
+            `;
+
+            contenedorFormularios.appendChild(div);
+
+            const form = div.querySelector('.form-producto-dinamico');
+            const inputUrl = div.querySelector('.prodUrl');
+            const previewImg = div.querySelector('.previewImagen');
+            const btnGuardar = div.querySelector('.btnGuardarProd');
+            const btnEliminar = div.querySelector('.btnEliminarProd');
+            const inputs = div.querySelectorAll('input');
+            let productoIdFirebase = idFirebase; 
+
+            if (!datosExistentes) {
+                inputUrl.addEventListener('input', (e) => {
+                    const url = e.target.value.trim();
+                    if (url) {
+                        previewImg.src = url;
+                    } else {
+                        previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
+                    }
+                });
+
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault(); 
+                    const nuevoProducto = {
+                        nombre: div.querySelector('.prodNombre').value,
+                        precio: parseFloat(div.querySelector('.prodPrecio').value),
+                        imagen: div.querySelector('.prodUrl').value
+                    };
+                    
+                    btnGuardar.innerText = 'Guardando...';
+                    btnGuardar.disabled = true;
+
+                    try {
+                        const docRef = await addDoc(collection(db, "productos"), nuevoProducto);
+                        productoIdFirebase = docRef.id;
+                        inputs.forEach(input => input.disabled = true);
+                        btnGuardar.style.display = 'none';
+                        btnEliminar.style.display = 'block';
+                    } catch (error) {
+                        alert("Error al guardar el producto.");
+                        btnGuardar.innerText = 'Guardar Producto';
+                        btnGuardar.disabled = false;
+                    }
+                });
+            }
+
+            btnEliminar.addEventListener('click', async () => {
+                if(confirm('¿Estás seguro de que quieres eliminar este producto del Inicio?')) {
+                    if (productoIdFirebase) {
+                        await deleteDoc(doc(db, "productos", productoIdFirebase));
+                    }
+                    div.remove();
+                }
+            });
+        }
+
+        btnAgregarNuevoFormulario.addEventListener('click', () => crearFormularioProducto(null, null));
+        
+        // Cargar productos existentes al abrir el admin
+        const cargarProductosExistentes = async () => {
+            const querySnapshot = await getDocs(collection(db, "productos"));
+            querySnapshot.forEach((docSnap) => {
+                crearFormularioProducto(docSnap.data(), docSnap.id);
+            });
+            if(querySnapshot.empty) {
+                crearFormularioProducto(null, null);
+            }
+        };
+        
+        cargarProductosExistentes();
+
     </script>
 </body>
 </html>
