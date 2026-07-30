@@ -12,24 +12,40 @@
     <div class="sidebar">
         <h2>Mivith Admin</h2>
         <ul class="menu-lateral">
-            <li class="activo">🔔 Órdenes Activas</li>
+            <li id="btnMenuOrdenes" class="activo" onclick="mostrarSeccion('ordenes')">🔔 Órdenes Activas</li>
+            <li id="btnMenuPromos" onclick="mostrarSeccion('promociones')">🏷️ Promociones</li>
             <li onclick="cerrarSesion()">🚪 Cerrar Sesión</li>
         </ul>
     </div>
 
     <div class="main-content">
-        <div class="header-panel">
-            <div>
-                <h1 style="margin: 0;">Monitor de Cocina (Comandas)</h1>
-                <p style="margin: 5px 0 0 0; color: #7da0ca;">Pedidos recibidos desde el menú web en tiempo real</p>
+        <div id="seccionOrdenes">
+            <div class="header-panel">
+                <div>
+                    <h1 style="margin: 0;">Monitor de Cocina (Comandas)</h1>
+                    <p style="margin: 5px 0 0 0; color: #7da0ca;">Pedidos recibidos desde el menú web en tiempo real</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <button class="btn-limpiar-todo" onclick="limpiarTodosLosPedidos()">🗑️ Borrar Historial</button>
+                    <div class="reloj" id="reloj">--:--:--</div>
+                </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <button class="btn-limpiar-todo" onclick="limpiarTodosLosPedidos()">🗑️ Borrar Historial</button>
-                <div class="reloj" id="reloj">--:--:--</div>
-            </div>
+
+            <div class="ordenes-grid" id="contenedorOrdenes"></div>
         </div>
 
-        <div class="ordenes-grid" id="contenedorOrdenes"></div>
+        <div id="seccionPromociones" style="display: none;">
+            <div class="header-panel">
+                <div>
+                    <h1 style="margin: 0;">Gestión de Promociones</h1>
+                    <p style="margin: 5px 0 0 0; color: #7da0ca;">Administra los combos y promociones activos para el menú</p>
+                </div>
+            </div>
+
+            <div class="promociones-content" style="margin-top: 20px;">
+                <p style="color: #052659;">Módulo de gestión de promociones listo para personalizar.</p>
+            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -48,6 +64,25 @@
             signOut(auth).then(() => {
                 window.location.href = "../index.html";
             });
+        };
+
+        window.mostrarSeccion = (seccion) => {
+            const secOrdenes = document.getElementById('seccionOrdenes');
+            const secPromos = document.getElementById('seccionPromociones');
+            const btnOrdenes = document.getElementById('btnMenuOrdenes');
+            const btnPromos = document.getElementById('btnMenuPromos');
+
+            if (seccion === 'ordenes') {
+                secOrdenes.style.display = 'block';
+                secPromos.style.display = 'none';
+                btnOrdenes.classList.add('activo');
+                btnPromos.classList.remove('activo');
+            } else if (seccion === 'promociones') {
+                secOrdenes.style.display = 'none';
+                secPromos.style.display = 'block';
+                btnPromos.classList.add('activo');
+                btnOrdenes.classList.remove('activo');
+            }
         };
 
         function actualizarReloj() {
