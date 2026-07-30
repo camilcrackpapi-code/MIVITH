@@ -14,7 +14,6 @@
         <h1 style="margin:0;">Mivith - Pedido en Mesa</h1>
     </header>
 
-    <!-- Menú Principal con Desplazamiento Horizontal (Inyección Dinámica desde Firebase) -->
     <section class="seccion-carta">
         <h2>Realiza tu Pedido</h2>
         <p class="instruccion-scroll">↔ Desliza hacia los lados para ver todas nuestras categorías</p>
@@ -24,12 +23,10 @@
         </div>
     </section>
 
-    <!-- Botón Flotante del Carrito -->
     <div class="cart-float-btn" onclick="toggleCarrito()">
         🛒 Pedido (<span id="cart-count">0</span>) | $<span id="cart-float-total">0</span>
     </div>
 
-    <!-- Panel Lateral del Carrito -->
     <div class="cart-sidebar" id="cart-sidebar">
         <div class="cart-header">
             <h3 style="margin: 0;">Tu Pedido</h3>
@@ -46,7 +43,6 @@
         </div>
     </div>
 
-    <!-- Conexión con Firebase Firestore & Lógica del Carrito -->
     <script type="module">
         import { db } from '../controllers/firebase-config.js';
         import { collection, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
@@ -55,7 +51,6 @@
         const contenedorCarta = document.getElementById('contenedorCartaDinamico');
         const ordenCategorias = ['Hamburguesas', 'Perros & Salchipapas', 'Postres', 'Bebidas', 'Promociones'];
 
-        // 1. CARGA DEL MENÚ EN TIEMPO REAL DESDE "menu_completo"
         onSnapshot(collection(db, "menu_completo"), (snapshot) => {
             if (snapshot.empty) {
                 contenedorCarta.innerHTML = '<p style="text-align: center; width: 100%; color: #8d6e63;">Aún no hay platos en el menú.</p>';
@@ -111,7 +106,6 @@
             contenedorCarta.innerHTML = '<p style="text-align: center; width: 100%; color: red;">Error al cargar el menú.</p>';
         });
 
-        // 2. FUNCIONES DEL CARRITO DISPONIBLES GLOBALMENTE
         window.toggleCarrito = function() {
             document.getElementById('cart-sidebar').classList.toggle('active');
         };
@@ -184,7 +178,6 @@
             contadorElemento.innerText = totalCantidad;
         }
 
-        // 3. ENVÍO DE PEDIDO A LA COLECTION "pedidos"
         const btnEnviar = document.getElementById('btnEnviarPedido');
 
         btnEnviar.addEventListener('click', async () => {
