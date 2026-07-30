@@ -35,3 +35,5 @@ body { font-family: 'Segoe UI', sans-serif; background-color: #021024; color: #f
 .btn-guardar:hover { background: #219150; }
 .btn-eliminar-prod { flex: 1; background: #e74c3c; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-size: 1em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
 .btn-eliminar-prod:hover { background: #c0392b; }
+.btn-nuevo-prod { flex: 1; background: #5483b3; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-size: 1em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+.btn-nuevo-prod:hover { background: #7da0ca; }
