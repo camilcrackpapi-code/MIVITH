@@ -30,10 +30,12 @@ body { font-family: 'Segoe UI', sans-serif; background-color: #021024; color: #f
 .campos-producto label { font-size: 0.9em; font-weight: bold; color: #c1e8ff; }
 .campos-producto input { padding: 10px; border-radius: 5px; border: 1px solid #5483b3; background: #021024; color: #fff; font-size: 1em; }
 .campos-producto input:focus { outline: none; border-color: #c1e8ff; }
+.campos-producto input:disabled { opacity: 0.7; background: #052659; cursor: not-allowed; }
 .acciones-formulario { display: flex; gap: 10px; width: 100%; margin-top: 15px; }
 .btn-guardar { flex: 1; background: #27ae60; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-size: 1em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-.btn-guardar:hover { background: #219150; }
+.btn-guardar:hover:not(:disabled) { background: #219150; }
+.btn-guardar:disabled { background: #1e7040; cursor: default; }
 .btn-eliminar-prod { flex: 1; background: #e74c3c; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-size: 1em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
 .btn-eliminar-prod:hover { background: #c0392b; }
-.btn-nuevo-prod { flex: 1; background: #5483b3; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-size: 1em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+.btn-nuevo-prod { background: #5483b3; color: white; border: none; padding: 15px 20px; border-radius: 5px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
 .btn-nuevo-prod:hover { background: #7da0ca; }
