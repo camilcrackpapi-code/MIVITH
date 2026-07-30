@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administración - Mivith</title>
-    <!-- Mantenemos el global por si lo necesitas, pero admin.css dominará aquí -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/admin.css">
 </head>
@@ -12,9 +11,7 @@
 
     <div class="admin-layout">
         
-        <!-- =====================================
-             MENÚ LATERAL (SIDEBAR VERTICAL)
-             ===================================== -->
+        <!-- SIDEBAR -->
         <aside class="admin-sidebar">
             <div class="sidebar-header">
                 <h2>Panel Admin</h2>
@@ -23,7 +20,8 @@
             
             <nav class="sidebar-nav">
                 <button id="btnMenuOrdenes" class="activo" onclick="mostrarSeccion('ordenes')">📄 Órdenes</button>
-                <button id="btnMenuPromos" onclick="mostrarSeccion('promociones')">🍔 Gestionar Productos</button>
+                <button id="btnMenuPromos" onclick="mostrarSeccion('promociones')">🍔 Inicio (Combos)</button>
+                <button id="btnMenuCarta" onclick="mostrarSeccion('carta')">📖 Menú Completo</button>
             </nav>
             
             <div class="sidebar-footer">
@@ -31,12 +29,10 @@
             </div>
         </aside>
 
-        <!-- =====================================
-             CONTENIDO PRINCIPAL (DERECHA)
-             ===================================== -->
+        <!-- CONTENIDO PRINCIPAL -->
         <main class="admin-main">
             
-            <!-- SECCIÓN DE ÓRDENES -->
+            <!-- SECCIÓN ÓRDENES -->
             <section id="seccionOrdenes" class="seccion activa">
                 <div class="header-seccion">
                     <h2>Control de Pedidos</h2>
@@ -45,57 +41,58 @@
                 <div id="contenedorOrdenes"></div>
             </section>
 
-            <!-- SECCIÓN DE PRODUCTOS (INDEX) -->
+            <!-- SECCIÓN PRODUCTOS INICIO (Combos) -->
             <section id="seccionPromociones" class="seccion">
                 <div class="header-seccion">
-                    <h2>Gestión del Menú (Inicio)</h2>
+                    <h2>Gestión del Menú (Página de Inicio)</h2>
                 </div>
-                <button id="btnAgregarNuevoFormulario">+ Agregar Nuevo Producto</button>
+                <button id="btnAgregarNuevoFormulario">+ Agregar Combo al Inicio</button>
                 <div id="contenedorFormulariosProductos"></div>
+            </section>
+
+            <!-- NUEVA SECCIÓN: MENÚ COMPLETO (La Carta) -->
+            <section id="seccionCarta" class="seccion">
+                <div class="header-seccion">
+                    <h2>Gestión de la Carta (Menú Completo)</h2>
+                </div>
+                <button id="btnAgregarItemCarta">+ Agregar Plato a la Carta</button>
+                <div id="contenedorFormulariosCarta"></div>
             </section>
 
         </main>
     </div>
 
-    <!-- Scripts de Firebase y Lógica -->
+    <!-- Scripts de Firebase -->
     <script type="module">
         import { auth, db } from '../controllers/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
         import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-        // Protección de sesión
-        onAuthStateChanged(auth, (usuario) => {
-            if (!usuario) { window.location.href = "../index.html"; }
-        });
+        // Protección y Cierre de sesión
+        onAuthStateChanged(auth, (usuario) => { if (!usuario) window.location.href = "../index.html"; });
         window.cerrarSesion = () => signOut(auth).then(() => window.location.href = "../index.html");
 
-        // Cambiar entre pestañas
+        // Navegación del menú lateral
         window.mostrarSeccion = (seccion) => {
-            document.getElementById('seccionOrdenes').classList.toggle('activa', seccion === 'ordenes');
-            document.getElementById('seccionPromociones').classList.toggle('activa', seccion === 'promociones');
+            ['ordenes', 'promociones', 'carta'].forEach(sec => {
+                document.getElementById('seccion' + sec.charAt(0).toUpperCase() + sec.slice(1)).classList.toggle('activa', seccion === sec);
+            });
             document.getElementById('btnMenuOrdenes').classList.toggle('activo', seccion === 'ordenes');
             document.getElementById('btnMenuPromos').classList.toggle('activo', seccion === 'promociones');
+            document.getElementById('btnMenuCarta').classList.toggle('activo', seccion === 'carta');
         };
 
-        // Reloj
         setInterval(() => document.getElementById('reloj').innerText = new Date().toLocaleTimeString(), 1000);
 
-        // --- LÓGICA DE ÓRDENES ---
-        const qPedidos = query(collection(db, "pedidos"), orderBy("timestamp", "desc"));
-        onSnapshot(qPedidos, (snapshot) => {
+        // --- 1. LÓGICA DE ÓRDENES ---
+        onSnapshot(query(collection(db, "pedidos"), orderBy("timestamp", "desc")), (snapshot) => {
             const contenedor = document.getElementById('contenedorOrdenes');
             if (snapshot.empty) return contenedor.innerHTML = '<p style="color: #a5b1c2;">No hay pedidos en este momento.</p>';
-            
             let html = '';
             snapshot.forEach((docSnap) => {
                 const orden = docSnap.data();
-                const id = docSnap.id;
-                let itemsHTML = (orden.items || orden.platos || []).map(p => 
-                    `<li><span>${p.cantidad || p.cant || 1}x ${p.nombre}</span></li>`
-                ).join('');
-                
+                let itemsHTML = (orden.items || []).map(p => `<li><span>${p.cantidad || 1}x ${p.nombre}</span></li>`).join('');
                 let hora = orden.timestamp ? orden.timestamp.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Reciente';
-                
                 html += `
                     <div class="orden-card ${orden.completada ? 'completada' : ''}">
                         <div class="cliente-tag">👤 ${orden.cliente || 'Cliente'}</div>
@@ -103,10 +100,10 @@
                         <div style="color:#a5b1c2;font-size:14px;">🕒 ${hora}</div>
                         <ul class="lista-platos">${itemsHTML}</ul>
                         ${orden.total ? `<div class="total-pedido">Total: $${orden.total.toLocaleString('es-CO')}</div>` : ''}
-                        <button class="btn-despachar ${orden.completada ? 'btn-completado' : ''}" onclick="alternarEstadoOrden('${id}', ${orden.completada})">
+                        <button class="btn-despachar ${orden.completada ? 'btn-completado' : ''}" onclick="alternarEstadoOrden('${docSnap.id}', ${orden.completada})">
                             ${orden.completada ? '✓ Completado' : 'Despachar ✓'}
                         </button>
-                        <button class="btn-eliminar" onclick="eliminarOrden('${id}')">Eliminar</button>
+                        <button class="btn-eliminar" onclick="eliminarOrden('${docSnap.id}')">Eliminar</button>
                     </div>`;
             });
             contenedor.innerHTML = html;
@@ -121,20 +118,17 @@
             }
         };
 
-        // --- LÓGICA DE PRODUCTOS ---
-        const contenedorFormularios = document.getElementById('contenedorFormulariosProductos');
-        
+        // --- 2. LÓGICA DE PRODUCTOS DE INICIO (Combos) ---
         function crearFormularioProducto(data = null, id = null) {
             const div = document.createElement('div');
             div.className = 'formulario-admin';
-            const imgSrc = data?.imagen || 'https://via.placeholder.com/150/001224/FFFFFF?text=Vista+Previa';
-            
+            const imgSrc = data?.imagen || 'https://via.placeholder.com/150/001224/FFFFFF?text=Imagen';
             div.innerHTML = `
                 <form class="form-producto-dinamico">
                     <div class="fila-producto">
                         <div class="preview-img"><img class="previewImagen" src="${imgSrc}"></div>
                         <div class="campos-producto">
-                            <label>Nombre del Producto</label>
+                            <label>Nombre del Combo</label>
                             <input type="text" class="prodNombre" value="${data?.nombre || ''}" required ${data ? 'disabled' : ''}>
                             <label>Precio (COP)</label>
                             <input type="number" class="prodPrecio" value="${data?.precio || ''}" required ${data ? 'disabled' : ''}>
@@ -143,54 +137,91 @@
                         </div>
                     </div>
                     <div class="acciones-formulario">
-                        ${!data ? '<button type="submit" class="btn-guardar">Guardar</button>' : ''}
-                        <button type="button" class="btn-rojo btnEliminarProd" ${!data ? 'style="display:none;"' : ''}>🗑️ Eliminar Producto</button>
+                        ${!data ? '<button type="submit" class="btn-guardar">Guardar Combo</button>' : ''}
+                        <button type="button" class="btn-rojo btnEliminarProd" ${!data ? 'style="display:none;"' : ''}>🗑️ Eliminar Combo</button>
                     </div>
-                </form>
-            `;
-            contenedorFormularios.appendChild(div);
-
-            const form = div.querySelector('form');
-            const preview = div.querySelector('.previewImagen');
-            const inputUrl = div.querySelector('.prodUrl');
-            const btnEliminar = div.querySelector('.btnEliminarProd');
-            let prodId = id;
+                </form>`;
+            document.getElementById('contenedorFormulariosProductos').appendChild(div);
 
             if (!data) {
-                inputUrl.addEventListener('input', e => preview.src = e.target.value || imgSrc);
-                form.addEventListener('submit', async (e) => {
+                div.querySelector('.prodUrl').addEventListener('input', e => div.querySelector('.previewImagen').src = e.target.value || imgSrc);
+                div.querySelector('form').addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    const btn = div.querySelector('.btn-guardar');
-                    btn.disabled = true; btn.innerText = 'Guardando...';
-                    
                     try {
                         const ref = await addDoc(collection(db, "productos"), {
                             nombre: div.querySelector('.prodNombre').value,
                             precio: parseFloat(div.querySelector('.prodPrecio').value),
-                            imagen: inputUrl.value
+                            imagen: div.querySelector('.prodUrl').value
                         });
-                        prodId = ref.id;
+                        id = ref.id;
                         div.querySelectorAll('input').forEach(i => i.disabled = true);
-                        btn.style.display = 'none';
-                        btnEliminar.style.display = 'block';
-                    } catch (error) { alert("Error al guardar"); btn.disabled = false; }
+                        div.querySelector('.btn-guardar').style.display = 'none';
+                        div.querySelector('.btnEliminarProd').style.display = 'block';
+                    } catch (error) { alert("Error al guardar"); }
                 });
             }
-
-            btnEliminar.addEventListener('click', async () => {
-                if(confirm('¿Eliminar producto del Menú Inicio?')) {
-                    if (prodId) await deleteDoc(doc(db, "productos", prodId));
-                    div.remove();
-                }
+            div.querySelector('.btnEliminarProd').addEventListener('click', async () => {
+                if(confirm('¿Eliminar combo del Inicio?')) { if (id) await deleteDoc(doc(db, "productos", id)); div.remove(); }
             });
         }
-
         document.getElementById('btnAgregarNuevoFormulario').addEventListener('click', () => crearFormularioProducto());
-        
-        getDocs(collection(db, "productos")).then(snap => {
-            if(snap.empty) crearFormularioProducto();
-            else snap.forEach(doc => crearFormularioProducto(doc.data(), doc.id));
-        });
+        getDocs(collection(db, "productos")).then(snap => snap.forEach(doc => crearFormularioProducto(doc.data(), doc.id)));
+
+
+        // --- 3. NUEVA LÓGICA: MENÚ COMPLETO (La Carta) ---
+        function crearFormularioCarta(data = null, id = null) {
+            const div = document.createElement('div');
+            div.className = 'formulario-admin';
+            
+            // Selector de categorías pre-seleccionado
+            const opcionesCategoria = ['Hamburguesas', 'Perros & Salchipapas', 'Postres', 'Bebidas', 'Promociones']
+                .map(cat => `<option value="${cat}" ${data?.categoria === cat ? 'selected' : ''}>${cat}</option>`).join('');
+
+            div.innerHTML = `
+                <form class="form-carta-dinamico">
+                    <div class="campos-producto">
+                        <label>Categoría</label>
+                        <select class="cartaCategoria" style="padding:10px; background:#001224; color:white; border:1px solid #004477; border-radius:4px;" ${data ? 'disabled' : ''}>
+                            ${opcionesCategoria}
+                        </select>
+                        <label>Nombre del Plato/Bebida</label>
+                        <input type="text" class="cartaNombre" value="${data?.nombre || ''}" required ${data ? 'disabled' : ''}>
+                        <label>Precio (COP)</label>
+                        <input type="number" class="cartaPrecio" value="${data?.precio || ''}" required ${data ? 'disabled' : ''}>
+                        <label>Descripción / Ingredientes</label>
+                        <input type="text" class="cartaDesc" value="${data?.descripcion || ''}" required ${data ? 'disabled' : ''}>
+                    </div>
+                    <div class="acciones-formulario" style="margin-top:15px;">
+                        ${!data ? '<button type="submit" class="btn-guardar">Guardar en Carta</button>' : ''}
+                        <button type="button" class="btn-rojo btnEliminarCarta" ${!data ? 'style="display:none;"' : ''}>🗑️ Eliminar Plato</button>
+                    </div>
+                </form>`;
+            document.getElementById('contenedorFormulariosCarta').appendChild(div);
+
+            if (!data) {
+                div.querySelector('form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    try {
+                        const ref = await addDoc(collection(db, "menu_completo"), {
+                            categoria: div.querySelector('.cartaCategoria').value,
+                            nombre: div.querySelector('.cartaNombre').value,
+                            precio: parseFloat(div.querySelector('.cartaPrecio').value),
+                            descripcion: div.querySelector('.cartaDesc').value
+                        });
+                        id = ref.id;
+                        div.querySelectorAll('input, select').forEach(i => i.disabled = true);
+                        div.querySelector('.btn-guardar').style.display = 'none';
+                        div.querySelector('.btnEliminarCarta').style.display = 'block';
+                    } catch (error) { alert("Error al guardar en la carta"); }
+                });
+            }
+            div.querySelector('.btnEliminarCarta').addEventListener('click', async () => {
+                if(confirm('¿Eliminar este plato del menú completo?')) { if (id) await deleteDoc(doc(db, "menu_completo", id)); div.remove(); }
+            });
+        }
+        document.getElementById('btnAgregarItemCarta').addEventListener('click', () => crearFormularioCarta());
+        getDocs(collection(db, "menu_completo")).then(snap => snap.forEach(doc => crearFormularioCarta(doc.data(), doc.id)));
+
     </script>
 </body>
 </html>
