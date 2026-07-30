@@ -4,37 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administración - Mivith</title>
-    <!-- Enlace al CSS global -->
     <link rel="stylesheet" href="../css/global.css">
-    <!-- Enlace al CSS específico del Admin -->
     <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
 
+    <!-- Barra de Navegación -->
     <div class="admin-nav">
         <div class="nav-left">
             <button id="btnMenuOrdenes" class="activo" onclick="mostrarSeccion('ordenes')">📄 Órdenes</button>
             <button id="btnMenuPromos" onclick="mostrarSeccion('promociones')">🍔 Gestionar Productos</button>
         </div>
-        <div>
-            <span id="reloj" style="margin-right: 20px; font-weight: bold;"></span>
+        <div class="nav-right">
+            <span id="reloj" style="font-weight: bold;"></span>
             <button class="btn-cerrar" onclick="cerrarSesion()">Cerrar Sesión</button>
         </div>
     </div>
 
     <!-- SECCIÓN DE ÓRDENES -->
     <section id="seccionOrdenes" class="seccion activa">
-        <div class="seccion-header">
+        <div class="header-seccion">
             <h2>Control de Pedidos</h2>
-            <button onclick="limpiarTodosLosPedidos()" class="btn-limpiar">⚠️ Limpiar Todos los Pedidos</button>
+            <button onclick="limpiarTodosLosPedidos()" class="btn-rojo">⚠️ Limpiar Todos los Pedidos</button>
         </div>
         <div id="contenedorOrdenes"></div>
     </section>
 
     <!-- SECCIÓN DE PRODUCTOS (INDEX) -->
     <section id="seccionPromociones" class="seccion">
-        <div class="seccion-header">
-            <h2>Gestión de Combos (Página de Inicio)</h2>
+        <div class="header-seccion">
+            <h2>Gestión del Menú (Inicio)</h2>
         </div>
         <button id="btnAgregarNuevoFormulario">+ Agregar Nuevo Producto</button>
         <div id="contenedorFormulariosProductos"></div>
@@ -45,225 +44,133 @@
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
         import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-        // Protección de ruta
+        // Protección de sesión
         onAuthStateChanged(auth, (usuario) => {
-            if (!usuario) {
-                alert("Acceso denegado. Debes iniciar sesión como administrador.");
-                window.location.href = "../index.html";
-            }
+            if (!usuario) { window.location.href = "../index.html"; }
         });
+        window.cerrarSesion = () => signOut(auth).then(() => window.location.href = "../index.html");
 
-        window.cerrarSesion = () => {
-            signOut(auth).then(() => {
-                window.location.href = "../index.html";
-            });
-        };
-
+        // Cambiar entre pestañas
         window.mostrarSeccion = (seccion) => {
-            const secOrdenes = document.getElementById('seccionOrdenes');
-            const secPromos = document.getElementById('seccionPromociones');
-            const btnOrdenes = document.getElementById('btnMenuOrdenes');
-            const btnPromos = document.getElementById('btnMenuPromos');
-
-            if (seccion === 'ordenes') {
-                secOrdenes.classList.add('activa');
-                secPromos.classList.remove('activa');
-                btnOrdenes.classList.add('activo');
-                btnPromos.classList.remove('activo');
-            } else if (seccion === 'promociones') {
-                secOrdenes.classList.remove('activa');
-                secPromos.classList.add('activa');
-                btnPromos.classList.add('activo');
-                btnOrdenes.classList.remove('activo');
-            }
+            document.getElementById('seccionOrdenes').classList.toggle('activa', seccion === 'ordenes');
+            document.getElementById('seccionPromociones').classList.toggle('activa', seccion === 'promociones');
+            document.getElementById('btnMenuOrdenes').classList.toggle('activo', seccion === 'ordenes');
+            document.getElementById('btnMenuPromos').classList.toggle('activo', seccion === 'promociones');
         };
 
-        function actualizarReloj() {
-            const ahora = new Date();
-            document.getElementById('reloj').innerText = ahora.toLocaleTimeString();
-        }
-        setInterval(actualizarReloj, 1000);
-        actualizarReloj();
+        // Reloj
+        setInterval(() => document.getElementById('reloj').innerText = new Date().toLocaleTimeString(), 1000);
 
-        // LOGICA DE PEDIDOS
-        const q = query(collection(db, "pedidos"), orderBy("timestamp", "desc"));
-        onSnapshot(q, (snapshot) => {
+        // --- LÓGICA DE ÓRDENES ---
+        const qPedidos = query(collection(db, "pedidos"), orderBy("timestamp", "desc"));
+        onSnapshot(qPedidos, (snapshot) => {
             const contenedor = document.getElementById('contenedorOrdenes');
-            if (snapshot.empty) {
-                contenedor.innerHTML = '<p style="color: #666; grid-column: 1/-1;">No hay pedidos registrados en este momento.</p>';
-                return;
-            }
-
-            let acumuladoHTML = '';
+            if (snapshot.empty) return contenedor.innerHTML = '<p>No hay pedidos.</p>';
+            let html = '';
             snapshot.forEach((docSnap) => {
                 const orden = docSnap.data();
                 const id = docSnap.id;
-                let itemsHTML = '';
-                const listaItems = orden.items || orden.platos || [];
+                let itemsHTML = (orden.items || orden.platos || []).map(p => 
+                    `<li><span>${p.cantidad || p.cant || 1}x ${p.nombre}</span></li>`
+                ).join('');
                 
-                listaItems.forEach(p => {
-                    const cantidad = p.cantidad || p.cant || 1;
-                    const precio = p.precio ? ($${(p.precio * cantidad).toLocaleString('es-CO')}) : '';
-                    itemsHTML += <li><span>${cantidad}x ${p.nombre}</span> <small>${precio}</small></li>;
-                });
-
-                const estaCompletada = orden.completada || false;
-                const cliente = orden.cliente || 'Cliente';
+                let hora = orden.timestamp ? orden.timestamp.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Reciente';
                 
-                let hora = 'Reciente';
-                if (orden.timestamp) {
-                    hora = orden.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                } else if (orden.fecha) {
-                    hora = orden.fecha;
-                }
-
-                const total = orden.total ? $${orden.total.toLocaleString('es-CO')} COP : '';
-
-                acumuladoHTML += `
-                    <div class="orden-card ${estaCompletada ? 'completada' : ''}">
-                        <div class="cliente-tag">👤 ${cliente}</div>
-                        <h3 style="margin-top: 0; color: #002244;">Orden</h3>
-                        <div class="cliente-info" style="color: #666; font-size: 14px;">🕒 Recibido: ${hora}</div>
-                        <ul class="lista-platos">
-                            ${itemsHTML}
-                        </ul>
-                        ${total ? <div class="total-pedido">Total: ${total}</div> : ''}
-                        <button class="btn-despachar ${estaCompletada ? 'btn-completado' : ''}" 
-                                onclick="alternarEstadoOrden('${id}', ${estaCompletada})">
-                            ${estaCompletada ? '✓ Completado (Deshacer)' : 'Despachar Pedido ✓'}
+                html += `
+                    <div class="orden-card ${orden.completada ? 'completada' : ''}">
+                        <div class="cliente-tag">👤 ${orden.cliente || 'Cliente'}</div>
+                        <h3 style="margin-top:0;">Orden</h3>
+                        <div style="color:#666;font-size:14px;">🕒 ${hora}</div>
+                        <ul class="lista-platos">${itemsHTML}</ul>
+                        ${orden.total ? `<div class="total-pedido">Total: $${orden.total.toLocaleString('es-CO')}</div>` : ''}
+                        <button class="btn-despachar ${orden.completada ? 'btn-completado' : ''}" onclick="alternarEstadoOrden('${id}', ${orden.completada})">
+                            ${orden.completada ? '✓ Completado' : 'Despachar ✓'}
                         </button>
-                        <button class="btn-eliminar" onclick="eliminarOrden('${id}')">Eliminar Comanda</button>
-                    </div>
-                `;
+                        <button class="btn-eliminar" onclick="eliminarOrden('${id}')">Eliminar</button>
+                    </div>`;
             });
-            contenedor.innerHTML = acumuladoHTML;
+            contenedor.innerHTML = html;
         });
 
-        window.alternarEstadoOrden = async (id, estadoActual) => {
-            await updateDoc(doc(db, "pedidos", id), { completada: !estadoActual });
-        };
-
-        window.eliminarOrden = async (id) => {
-            if (confirm("¿Estás seguro de eliminar esta comanda?")) {
-                await deleteDoc(doc(db, "pedidos", id));
-            }
-        };
-
+        window.alternarEstadoOrden = async (id, estado) => await updateDoc(doc(db, "pedidos", id), { completada: !estado });
+        window.eliminarOrden = async (id) => { if (confirm("¿Eliminar comanda?")) await deleteDoc(doc(db, "pedidos", id)); };
         window.limpiarTodosLosPedidos = async () => {
-            if (confirm("⚠️ ¿Deseas borrar TODOS los pedidos recibidos? Esta acción no se puede deshacer.")) {
-                const querySnapshot = await getDocs(collection(db, "pedidos"));
-                const promesas = querySnapshot.docs.map(d => deleteDoc(doc(db, "pedidos", d.id)));
-                await Promise.all(promesas);
+            if (confirm("¿Borrar TODOS los pedidos?")) {
+                const snaps = await getDocs(collection(db, "pedidos"));
+                snaps.docs.forEach(d => deleteDoc(doc(db, "pedidos", d.id)));
             }
         };
 
-        // LOGICA DE PRODUCTOS (Para el Index)
+        // --- LÓGICA DE PRODUCTOS ---
         const contenedorFormularios = document.getElementById('contenedorFormulariosProductos');
-        const btnAgregarNuevoFormulario = document.getElementById('btnAgregarNuevoFormulario');
-
-        function crearFormularioProducto(datosExistentes = null, idFirebase = null) {
+        
+        function crearFormularioProducto(data = null, id = null) {
             const div = document.createElement('div');
             div.className = 'formulario-admin';
-            
-            const nombreVal = datosExistentes ? datosExistentes.nombre : '';
-            const precioVal = datosExistentes ? datosExistentes.precio : '';
-            const imagenVal = datosExistentes ? datosExistentes.imagen : '';
-            const imgSrc = imagenVal ? imagenVal : 'https://via.placeholder.com/150?text=Vista+Previa';
+            const imgSrc = data?.imagen || 'https://via.placeholder.com/150?text=Imagen';
             
             div.innerHTML = `
                 <form class="form-producto-dinamico">
                     <div class="fila-producto">
-                        <div class="preview-img">
-                            <img class="previewImagen" src="${imgSrc}" alt="Vista previa">
-                        </div>
+                        <div class="preview-img"><img class="previewImagen" src="${imgSrc}"></div>
                         <div class="campos-producto">
-                            <label style="font-size: 14px; color: #555;">Nombre del producto</label>
-                            <input type="text" class="prodNombre" value="${nombreVal}" placeholder="Ej. Combo Especial" required ${datosExistentes ? 'disabled' : ''}>
-                            
-                            <label style="font-size: 14px; color: #555; margin-top: 5px;">Precio (COP)</label>
-                            <input type="number" class="prodPrecio" value="${precioVal}" placeholder="Ej. 18000" required ${datosExistentes ? 'disabled' : ''}>
-                            
-                            <label style="font-size: 14px; color: #555; margin-top: 5px;">URL de la imagen</label>
-                            <input type="url" class="prodUrl" value="${imagenVal}" placeholder="https://..." required ${datosExistentes ? 'disabled' : ''}>
+                            <label>Nombre</label>
+                            <input type="text" class="prodNombre" value="${data?.nombre || ''}" required ${data ? 'disabled' : ''}>
+                            <label>Precio (COP)</label>
+                            <input type="number" class="prodPrecio" value="${data?.precio || ''}" required ${data ? 'disabled' : ''}>
+                            <label>URL de la imagen</label>
+                            <input type="url" class="prodUrl" value="${data?.imagen || ''}" required ${data ? 'disabled' : ''}>
                         </div>
                     </div>
                     <div class="acciones-formulario">
-                        ${!datosExistentes ? '<button type="submit" class="btn-guardar btnGuardarProd">Guardar Producto</button>' : ''}
-                        <button type="button" class="btn-eliminar-prod btnEliminarProd" ${!datosExistentes ? 'style="display: none;"' : ''}>🗑️ Eliminar Producto</button>
+                        ${!data ? '<button type="submit" class="btn-guardar">Guardar</button>' : ''}
+                        <button type="button" class="btn-rojo btnEliminarProd" ${!data ? 'style="display:none;"' : ''}>🗑️ Eliminar</button>
                     </div>
                 </form>
             `;
-
             contenedorFormularios.appendChild(div);
 
-            const form = div.querySelector('.form-producto-dinamico');
+            const form = div.querySelector('form');
+            const preview = div.querySelector('.previewImagen');
             const inputUrl = div.querySelector('.prodUrl');
-            const previewImg = div.querySelector('.previewImagen');
-            const btnGuardar = div.querySelector('.btnGuardarProd');
             const btnEliminar = div.querySelector('.btnEliminarProd');
-            const inputs = div.querySelectorAll('input');
-            let productoIdFirebase = idFirebase; 
+            let prodId = id;
 
-            if (!datosExistentes) {
-                inputUrl.addEventListener('input', (e) => {
-                    const url = e.target.value.trim();
-                    if (url) {
-                        previewImg.src = url;
-                    } else {
-                        previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
-                    }
-                });
-
+            if (!data) {
+                inputUrl.addEventListener('input', e => preview.src = e.target.value || imgSrc);
                 form.addEventListener('submit', async (e) => {
-                    e.preventDefault(); 
-                    const nuevoProducto = {
-                        nombre: div.querySelector('.prodNombre').value,
-                        precio: parseFloat(div.querySelector('.prodPrecio').value),
-                        imagen: div.querySelector('.prodUrl').value
-                    };
+                    e.preventDefault();
+                    const btn = div.querySelector('.btn-guardar');
+                    btn.disabled = true; btn.innerText = 'Guardando...';
                     
-                    btnGuardar.innerText = 'Guardando...';
-                    btnGuardar.disabled = true;
-
                     try {
-                        const docRef = await addDoc(collection(db, "productos"), nuevoProducto);
-                        productoIdFirebase = docRef.id;
-                        inputs.forEach(input => input.disabled = true);
-                        btnGuardar.style.display = 'none';
+                        const ref = await addDoc(collection(db, "productos"), {
+                            nombre: div.querySelector('.prodNombre').value,
+                            precio: parseFloat(div.querySelector('.prodPrecio').value),
+                            imagen: inputUrl.value
+                        });
+                        prodId = ref.id;
+                        div.querySelectorAll('input').forEach(i => i.disabled = true);
+                        btn.style.display = 'none';
                         btnEliminar.style.display = 'block';
-                    } catch (error) {
-                        alert("Error al guardar el producto.");
-                        btnGuardar.innerText = 'Guardar Producto';
-                        btnGuardar.disabled = false;
-                    }
+                    } catch (error) { alert("Error al guardar"); btn.disabled = false; }
                 });
             }
 
             btnEliminar.addEventListener('click', async () => {
-                if(confirm('¿Estás seguro de que quieres eliminar este producto del Inicio?')) {
-                    if (productoIdFirebase) {
-                        await deleteDoc(doc(db, "productos", productoIdFirebase));
-                    }
+                if(confirm('¿Eliminar producto del Menú Inicio?')) {
+                    if (prodId) await deleteDoc(doc(db, "productos", prodId));
                     div.remove();
                 }
             });
         }
 
-        btnAgregarNuevoFormulario.addEventListener('click', () => crearFormularioProducto(null, null));
+        document.getElementById('btnAgregarNuevoFormulario').addEventListener('click', () => crearFormularioProducto());
         
-        // Cargar productos existentes al abrir el admin
-        const cargarProductosExistentes = async () => {
-            const querySnapshot = await getDocs(collection(db, "productos"));
-            querySnapshot.forEach((docSnap) => {
-                crearFormularioProducto(docSnap.data(), docSnap.id);
-            });
-            if(querySnapshot.empty) {
-                crearFormularioProducto(null, null);
-            }
-        };
-        
-        cargarProductosExistentes();
-
+        getDocs(collection(db, "productos")).then(snap => {
+            if(snap.empty) crearFormularioProducto();
+            else snap.forEach(doc => crearFormularioProducto(doc.data(), doc.id));
+        });
     </script>
 </body>
 </html>
