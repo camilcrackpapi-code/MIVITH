@@ -24,123 +24,9 @@
         <h2>Nuestro Menú</h2>
         <p class="instruccion-scroll">↔ Desliza hacia los lados para ver todas nuestras categorías</p>
         
-        <div class="contenedor-horizontal">
-            
-            <!-- HAMBURGUESAS -->
-            <div class="columna-carta">
-                <h3 class="titulo-categoria">Hamburguesas</h3>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Clásica</h4>
-                        <span class="item-precio">$18.000</span>
-                    </div>
-                    <p class="item-desc">Carne jugosa, lechuga fresca, tomate y nuestra salsa especial.</p>
-                </div>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>BBQ</h4>
-                        <span class="item-precio">$22.000</span>
-                    </div>
-                    <p class="item-desc">Bañada en nuestra salsa BBQ casera con cebolla caramelizada.</p>
-                </div>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Doble Carne</h4>
-                        <span class="item-precio">$26.000</span>
-                    </div>
-                    <p class="item-desc">Doble de sabor, doble de satisfacción. Dos carnes jugosas con queso fundido.</p>
-                </div>
-            </div>
-
-            <!-- PERROS CALIENTES Y SALCHIPAPAS -->
-            <div class="columna-carta">
-                <h3 class="titulo-categoria">Perros & Salchipapas</h3>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Perro Especial</h4>
-                        <span class="item-precio">$16.000</span>
-                    </div>
-                    <p class="item-desc">Con queso fundido, tocino crujiente y nuestra salsa especial.</p>
-                </div>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Perro Ranchero</h4>
-                        <span class="item-precio">$18.000</span>
-                    </div>
-                    <p class="item-desc">Huevo, champiñones y queso derretido</p>
-                </div>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Salchipapa Mixta</h4>
-                        <span class="item-precio">$24.000</span>
-                    </div>
-                    <p class="item-desc">La más completa: salchicha, carne, queso, huevo y acompañamientos.</p>
-                </div>
-            </div>
-
-            <!-- POSTRES -->
-            <div class="columna-carta">
-                <h3 class="titulo-categoria">Postres</h3>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Brownie con Helado</h4>
-                        <span class="item-precio">$12.000</span>
-                    </div>
-                    <p class="item-desc">Brownie tibio con helado de vainilla artesanal.</p>
-                </div>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Cheesecake</h4>
-                        <span class="item-precio">$12.000</span>
-                    </div>
-                    <p class="item-desc">Cremoso, suave y con un toque de limón. Receta casera.</p>
-                </div>
-            </div>
-
-            <!-- BEBIDAS -->
-            <div class="columna-carta">
-                <h3 class="titulo-categoria">Bebidas</h3>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Limonada de Coco</h4>
-                        <span class="item-precio">$10.000</span>
-                    </div>
-                    <p class="item-desc">Nuestra especialidad. Cremosa, refrescante y única en Mivith.</p>
-                </div>
-            </div>
-
-            <!-- COMBOS -->
-            <div class="columna-carta">
-                <h3 class="titulo-categoria" style="color: #f1c40f;">Promociones</h3>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Combo 1</h4>
-                        <span class="item-precio">$65.000</span>
-                    </div>
-                    <p class="item-desc">4 Hamburguesas Clásicas + Gaseosa 1.5L.</p>
-                </div>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Combo 2</h4>
-                        <span class="item-precio">$45.000</span>
-                    </div>
-                    <p class="item-desc">2 Hamburguesas Clásicas + 2 Papas + Gaseosa 1L.</p>
-                </div>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Combo 3</h4>
-                        <span class="item-precio">$35.000</span>
-                    </div>
-                    <p class="item-desc">1 Hamburguesa Especial + 1 Perro Clásico + 2 Papas + Gaseosa 1L.</p>
-                </div>
-                <div class="item-carta">
-                    <div class="item-header">
-                        <h4>Combo 4</h4>
-                        <span class="item-precio">$68.000</span>
-                    </div>
-                    <p class="item-desc">2 Hamburguesas + 2 Perros Especiales + 2 Papas + Gaseosa 1.5L.</p>
-                </div>
-            </div>
+        <!-- CONTENEDOR DINÁMICO (Firebase inyectará los datos aquí) -->
+        <div class="contenedor-horizontal" id="contenedorCartaDinamico">
+            <p style="text-align: center; width: 100%; color: #8d6e63;">Cargando menú...</p>
         </div>
     </section>
 
@@ -174,5 +60,72 @@
         </div>
     </footer>
     
+    <!-- SCRIPT PARA CARGAR LA CARTA DESDE FIREBASE -->
+    <script type="module">
+        import { db } from '../controllers/firebase-config.js';
+        import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+        const contenedorCarta = document.getElementById('contenedorCartaDinamico');
+
+        // Orden de las categorías a mostrar
+        const ordenCategorias = ['Hamburguesas', 'Perros & Salchipapas', 'Postres', 'Bebidas', 'Promociones'];
+
+        onSnapshot(collection(db, "menu_completo"), (snapshot) => {
+            if (snapshot.empty) {
+                contenedorCarta.innerHTML = '<p style="text-align: center; width: 100%; color: #8d6e63;">Aún no hay platos en el menú.</p>';
+                return;
+            }
+
+            // Agrupar los platos por categoría
+            const platosPorCategoria = {};
+            ordenCategorias.forEach(cat => platosPorCategoria[cat] = []); // Inicializar arrays
+
+            snapshot.forEach(doc => {
+                const plato = doc.data();
+                if (platosPorCategoria[plato.categoria]) {
+                    platosPorCategoria[plato.categoria].push(plato);
+                }
+            });
+
+            // Generar el HTML
+            let htmlFinal = '';
+            
+            ordenCategorias.forEach(categoria => {
+                const platos = platosPorCategoria[categoria];
+                
+                // Solo dibuja la columna si hay platos en esa categoría
+                if (platos.length > 0) {
+                    
+                    // Si es promoción, poner el título en amarillo según tu CSS original
+                    const colorTitulo = categoria === 'Promociones' ? 'style="color: #f1c40f;"' : '';
+
+                    let columnaHTML = `
+                        <div class="columna-carta">
+                            <h3 class="titulo-categoria" ${colorTitulo}>${categoria}</h3>`;
+                    
+                    platos.forEach(plato => {
+                        const precioF = plato.precio ? plato.precio.toLocaleString('es-CO') : '0';
+                        columnaHTML += `
+                            <div class="item-carta">
+                                <div class="item-header">
+                                    <h4>${plato.nombre}</h4>
+                                    <span class="item-precio">$${precioF}</span>
+                                </div>
+                                <p class="item-desc">${plato.descripcion}</p>
+                            </div>
+                        `;
+                    });
+
+                    columnaHTML += `</div>`;
+                    htmlFinal += columnaHTML;
+                }
+            });
+
+            contenedorCarta.innerHTML = htmlFinal;
+        }, (error) => {
+            console.error("Error al cargar la carta:", error);
+            contenedorCarta.innerHTML = '<p style="text-align: center; width: 100%; color: red;">Error al cargar el menú.</p>';
+        });
+    </script>
 </body>
 </html>
