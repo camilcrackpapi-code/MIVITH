@@ -38,27 +38,8 @@
                 </div>
             </div>
             <div class="promociones-content" style="margin-top: 20px;">
-                <form id="formNuevoProducto" class="formulario-admin">
-                    <div class="fila-producto">
-                        <div class="preview-img">
-                            <img id="previewImagen" src="https://via.placeholder.com/150?text=Vista+Previa" alt="Vista previa de la imagen">
-                        </div>
-                        <div class="campos-producto">
-                            <label for="prodNombre">Nombre del producto</label>
-                            <input type="text" id="prodNombre" placeholder="Ej. Hamburguesa Especial" required>
-                            <label for="prodPrecio">Precio (COP)</label>
-                            <input type="number" id="prodPrecio" placeholder="Ej. 18000" required>
-                            <label for="prodUrl">URL de la imagen</label>
-                            <input type="url" id="prodUrl" placeholder="https://..." required>
-                        </div>
-                    </div>
-                    <p id="mensajeFormulario" style="display: none; padding-top: 10px; text-align: center; font-weight: bold;"></p>
-                    <div class="acciones-formulario">
-                        <button type="submit" class="btn-guardar" id="btnGuardarProd">Guardar Producto</button>
-                        <button type="button" class="btn-eliminar-prod" id="btnEliminarProd" style="display: none;">🗑️ Eliminar Producto</button>
-                        <button type="button" class="btn-nuevo-prod" id="btnNuevoProd" style="display: none;">➕ Agregar Producto</button>
-                    </div>
-                </form>
+                <div id="contenedorFormulariosProductos"></div>
+                <button type="button" class="btn-nuevo-prod" id="btnAgregarNuevoFormulario" style="width: 100%; max-width: 600px; margin-top: 10px;">➕ Agregar Nuevo Producto</button>
             </div>
         </div>
     </div>
@@ -163,17 +144,15 @@
 
             contenedor.innerHTML = acumuladoHTML;
         }, (error) => {
-            console.error("Error al cargar pedidos:", error);
+            console.error(error);
         });
 
         window.alternarEstadoOrden = async (id, estadoActual) => {
             try {
                 const refPedido = doc(db, "pedidos", id);
-                await updateDoc(refPedido, {
-                    completada: !estadoActual
-                });
+                await updateDoc(refPedido, { completada: !estadoActual });
             } catch (error) {
-                console.error("Error al actualizar estado:", error);
+                console.error(error);
             }
         };
 
@@ -182,7 +161,7 @@
                 try {
                     await deleteDoc(doc(db, "pedidos", id));
                 } catch (error) {
-                    console.error("Error al eliminar:", error);
+                    console.error(error);
                 }
             }
         };
@@ -194,59 +173,91 @@
                     const promesas = querySnapshot.docs.map(d => deleteDoc(doc(db, "pedidos", d.id)));
                     await Promise.all(promesas);
                 } catch (error) {
-                    console.error("Error al limpiar historial:", error);
+                    console.error(error);
                 }
             }
         };
 
-        const inputUrl = document.getElementById('prodUrl');
-        const previewImg = document.getElementById('previewImagen');
-        const formNuevoProducto = document.getElementById('formNuevoProducto');
-        const btnGuardarProd = document.getElementById('btnGuardarProd');
-        const btnEliminarProd = document.getElementById('btnEliminarProd');
-        const btnNuevoProd = document.getElementById('btnNuevoProd');
+        const contenedorFormularios = document.getElementById('contenedorFormulariosProductos');
+        const btnAgregarNuevoFormulario = document.getElementById('btnAgregarNuevoFormulario');
 
-        inputUrl.addEventListener('input', (e) => {
-            const url = e.target.value.trim();
-            if (url) {
-                previewImg.src = url;
-            } else {
-                previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
-            }
-        });
+        function crearFormularioProducto() {
+            const div = document.createElement('div');
+            div.className = 'formulario-admin';
+            div.style.marginBottom = '20px';
+            
+            div.innerHTML = `
+                <form class="form-producto-dinamico">
+                    <div class="fila-producto">
+                        <div class="preview-img">
+                            <img class="previewImagen" src="https://via.placeholder.com/150?text=Vista+Previa" alt="Vista previa">
+                        </div>
+                        <div class="campos-producto">
+                            <label>Nombre del producto</label>
+                            <input type="text" class="prodNombre" placeholder="Ej. Hamburguesa Especial" required>
+                            
+                            <label>Precio (COP)</label>
+                            <input type="number" class="prodPrecio" placeholder="Ej. 18000" required>
+                            
+                            <label>URL de la imagen</label>
+                            <input type="url" class="prodUrl" placeholder="https://..." required>
+                        </div>
+                    </div>
+                    <div class="acciones-formulario">
+                        <button type="submit" class="btn-guardar btnGuardarProd">Guardar Producto</button>
+                        <button type="button" class="btn-eliminar-prod btnEliminarProd" style="display: none;">🗑️ Eliminar Producto</button>
+                    </div>
+                </form>
+            `;
 
-        formNuevoProducto.addEventListener('submit', (e) => {
-            e.preventDefault(); 
-            const nuevoProducto = {
-                nombre: document.getElementById('prodNombre').value,
-                precio: parseFloat(document.getElementById('prodPrecio').value),
-                imagen: document.getElementById('prodUrl').value
-            };
-            console.log("Datos guardados/actualizados:", nuevoProducto);
-            btnGuardarProd.innerText = '✅ Guardado (Actualizar)';
-            btnEliminarProd.style.display = 'block';
-            btnNuevoProd.style.display = 'block';
-        });
+            contenedorFormularios.appendChild(div);
 
-        btnEliminarProd.addEventListener('click', () => {
-            if(confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-                console.log("Producto eliminado correctamente");
-                formNuevoProducto.reset();
-                previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
-                btnGuardarProd.innerText = 'Guardar Producto';
-                btnEliminarProd.style.display = 'none';
-                btnNuevoProd.style.display = 'none';
-            }
-        });
+            const form = div.querySelector('.form-producto-dinamico');
+            const inputUrl = div.querySelector('.prodUrl');
+            const previewImg = div.querySelector('.previewImagen');
+            const btnGuardar = div.querySelector('.btnGuardarProd');
+            const btnEliminar = div.querySelector('.btnEliminarProd');
+            const inputs = div.querySelectorAll('input');
 
-        btnNuevoProd.addEventListener('click', () => {
-            formNuevoProducto.reset();
-            previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
-            btnGuardarProd.innerText = 'Guardar Producto';
-            btnEliminarProd.style.display = 'none';
-            btnNuevoProd.style.display = 'none';
-            document.getElementById('prodNombre').focus();
-        });
+            inputUrl.addEventListener('input', (e) => {
+                const url = e.target.value.trim();
+                if (url) {
+                    previewImg.src = url;
+                } else {
+                    previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
+                }
+            });
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault(); 
+                
+                const nuevoProducto = {
+                    nombre: div.querySelector('.prodNombre').value,
+                    precio: parseFloat(div.querySelector('.prodPrecio').value),
+                    imagen: div.querySelector('.prodUrl').value
+                };
+                
+                console.log("Producto capturado:", nuevoProducto);
+                
+                inputs.forEach(input => input.disabled = true);
+                
+                btnGuardar.innerText = '✅ Producto Guardado';
+                btnGuardar.disabled = true;
+                btnEliminar.style.display = 'block';
+            });
+
+            btnEliminar.addEventListener('click', () => {
+                if(confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                    div.remove();
+                }
+            });
+            
+            div.querySelector('.prodNombre').focus();
+        }
+
+        btnAgregarNuevoFormulario.addEventListener('click', crearFormularioProducto);
+
+        crearFormularioProducto();
     </script>
 </body>
 </html>
