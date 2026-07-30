@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Cocina - Mivith</title>
-    <!-- Asegúrate de que las rutas a tus CSS sean correctas -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/admin.css">
 </head>
@@ -40,7 +39,7 @@
             <div class="header-panel">
                 <div>
                     <h1 style="margin: 0;">Gestión de Productos</h1>
-                    <p style="margin: 5px 0 0 0; color: #7da0ca;">Registra un nuevo plato con su imagen, nombre y precio</p>
+                    <p style="margin: 5px 0 0 0; color: #7da0ca;">Registra o edita platos con su imagen, nombre y precio</p>
                 </div>
             </div>
 
@@ -63,7 +62,12 @@
                     </div>
                     
                     <p id="mensajeFormulario" style="display: none; padding-top: 10px; text-align: center; font-weight: bold;"></p>
-                    <button type="submit" class="btn-guardar">Guardar Producto</button>
+                    
+                    <!-- Contenedor de botones -->
+                    <div class="acciones-formulario">
+                        <button type="submit" class="btn-guardar" id="btnGuardarProd">Guardar Producto</button>
+                        <button type="button" class="btn-eliminar-prod" id="btnEliminarProd" style="display: none;">🗑️ Eliminar Producto</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -214,7 +218,10 @@
         const inputUrl = document.getElementById('prodUrl');
         const previewImg = document.getElementById('previewImagen');
         const formNuevoProducto = document.getElementById('formNuevoProducto');
-        const mensaje = document.getElementById('mensajeFormulario');
+        
+        // Botones
+        const btnGuardarProd = document.getElementById('btnGuardarProd');
+        const btnEliminarProd = document.getElementById('btnEliminarProd');
 
         // Actualizar vista previa de la imagen al escribir la URL
         inputUrl.addEventListener('input', (e) => {
@@ -226,9 +233,9 @@
             }
         });
 
-        // Manejar el envío del formulario
+        // 1. Al presionar "Guardar Producto"
         formNuevoProducto.addEventListener('submit', (e) => {
-            e.preventDefault(); // Evita que la página se recargue
+            e.preventDefault(); 
 
             const nuevoProducto = {
                 nombre: document.getElementById('prodNombre').value,
@@ -236,22 +243,28 @@
                 imagen: document.getElementById('prodUrl').value
             };
 
-            // Aquí tienes los datos guardados en la variable 'nuevoProducto' listos para usarse
-            console.log("Datos capturados:", nuevoProducto);
+            // Aquí guardas/actualizas los datos en tu base de datos
+            console.log("Datos guardados/actualizados:", nuevoProducto);
             
-            // Mostrar mensaje de éxito temporal
-            mensaje.style.display = 'block';
-            mensaje.style.color = '#27ae60';
-            mensaje.innerText = `¡Plato "${nuevoProducto.nombre}" capturado correctamente!`;
-            
-            // Ocultar el mensaje después de 4 segundos
-            setTimeout(() => {
-                mensaje.style.display = 'none';
-            }, 4000);
-            
-            // Limpiar el formulario y resetear la imagen
-            formNuevoProducto.reset();
-            previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
+            // Dejar la información intacta, cambiar el texto del botón y mostrar "Eliminar"
+            btnGuardarProd.innerText = '✅ Guardado (Actualizar)';
+            btnEliminarProd.style.display = 'block';
+        });
+
+        // 2. Al presionar "Eliminar Producto"
+        btnEliminarProd.addEventListener('click', () => {
+            if(confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                // Aquí iría tu lógica para borrar de la base de datos
+                console.log("Producto eliminado correctamente");
+                
+                // Limpiamos el formulario porque el producto ya no existe
+                formNuevoProducto.reset();
+                previewImg.src = 'https://via.placeholder.com/150?text=Vista+Previa';
+                
+                // Restauramos los botones a su estado inicial
+                btnGuardarProd.innerText = 'Guardar Producto';
+                btnEliminarProd.style.display = 'none';
+            }
         });
     </script>
 </body>
