@@ -11,7 +11,6 @@
 
     <div class="admin-layout">
         
-        <!-- SIDEBAR -->
         <aside class="admin-sidebar">
             <div class="sidebar-header">
                 <h2>Panel Admin</h2>
@@ -29,10 +28,8 @@
             </div>
         </aside>
 
-        <!-- CONTENIDO PRINCIPAL -->
         <main class="admin-main">
             
-            <!-- SECCIÓN ÓRDENES -->
             <section id="seccionOrdenes" class="seccion activa">
                 <div class="header-seccion">
                     <h2>Control de Pedidos</h2>
@@ -41,38 +38,33 @@
                 <div id="contenedorOrdenes"></div>
             </section>
 
-            <!-- SECCIÓN PRODUCTOS INICIO (Combos) -->
             <section id="seccionPromociones" class="seccion">
                 <div class="header-seccion">
                     <h2>Gestión del Menú (Página de Inicio)</h2>
                 </div>
-                <button id="btnAgregarNuevoFormulario">+ Agregar Combo al Inicio</button>
+                <button id="btnAgregarNuevoFormulario" style="background:#f39c12; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; font-weight:bold; margin-bottom:20px;">+ Agregar Combo al Inicio</button>
                 <div id="contenedorFormulariosProductos"></div>
             </section>
 
-            <!-- NUEVA SECCIÓN: MENÚ COMPLETO (La Carta) -->
             <section id="seccionCarta" class="seccion">
                 <div class="header-seccion">
                     <h2>Gestión de la Carta (Menú Completo)</h2>
                 </div>
-                <button id="btnAgregarItemCarta">+ Agregar Plato a la Carta</button>
+                <button id="btnAgregarItemCarta" style="background:#f39c12; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; font-weight:bold; margin-bottom:20px;">+ Agregar Plato a la Carta</button>
                 <div id="contenedorFormulariosCarta"></div>
             </section>
 
         </main>
     </div>
 
-    <!-- Scripts de Firebase -->
     <script type="module">
         import { auth, db } from '../controllers/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
         import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-        // Protección y Cierre de sesión
         onAuthStateChanged(auth, (usuario) => { if (!usuario) window.location.href = "../index.html"; });
         window.cerrarSesion = () => signOut(auth).then(() => window.location.href = "../index.html");
 
-        // Navegación del menú lateral
         window.mostrarSeccion = (seccion) => {
             ['ordenes', 'promociones', 'carta'].forEach(sec => {
                 document.getElementById('seccion' + sec.charAt(0).toUpperCase() + sec.slice(1)).classList.toggle('activa', seccion === sec);
@@ -84,7 +76,6 @@
 
         setInterval(() => document.getElementById('reloj').innerText = new Date().toLocaleTimeString(), 1000);
 
-        // --- 1. LÓGICA DE ÓRDENES ---
         onSnapshot(query(collection(db, "pedidos"), orderBy("timestamp", "desc")), (snapshot) => {
             const contenedor = document.getElementById('contenedorOrdenes');
             if (snapshot.empty) return contenedor.innerHTML = '<p style="color: #a5b1c2;">No hay pedidos en este momento.</p>';
@@ -118,11 +109,11 @@
             }
         };
 
-        // --- 2. LÓGICA DE PRODUCTOS DE INICIO (Combos) ---
         function crearFormularioProducto(data = null, id = null) {
             const div = document.createElement('div');
             div.className = 'formulario-admin';
             const imgSrc = data?.imagen || 'https://via.placeholder.com/150/001224/FFFFFF?text=Imagen';
+            
             div.innerHTML = `
                 <form class="form-producto-dinamico">
                     <div class="fila-producto">
@@ -136,44 +127,74 @@
                             <input type="url" class="prodUrl" value="${data?.imagen || ''}" required ${data ? 'disabled' : ''}>
                         </div>
                     </div>
-                    <div class="acciones-formulario">
-                        ${!data ? '<button type="submit" class="btn-guardar">Guardar Combo</button>' : ''}
-                        <button type="button" class="btn-rojo btnEliminarProd" ${!data ? 'style="display:none;"' : ''}>🗑️ Eliminar Combo</button>
+                    <div class="acciones-formulario" style="margin-top:15px; display:flex; gap:10px;">
+                        <button type="button" class="btn-editar" style="background:#3498db; color:white; border:none; padding:10px 15px; border-radius:4px; cursor:pointer; font-weight:bold; ${data ? '' : 'display:none;'}">✏️ Editar</button>
+                        <button type="submit" class="btn-guardar" style="background:#27ae60; color:white; border:none; padding:10px 15px; border-radius:4px; cursor:pointer; font-weight:bold; ${data ? 'display:none;' : ''}">Guardar Combo</button>
+                        <button type="button" class="btn-rojo btnEliminarProd" style="${data ? '' : 'display:none;'}">🗑️ Eliminar</button>
                     </div>
                 </form>`;
-            document.getElementById('contenedorFormulariosProductos').appendChild(div);
+            document.getElementById('contenedorFormulariosProductos').prepend(div); 
 
-            if (!data) {
-                div.querySelector('.prodUrl').addEventListener('input', e => div.querySelector('.previewImagen').src = e.target.value || imgSrc);
-                div.querySelector('form').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    try {
-                        const ref = await addDoc(collection(db, "productos"), {
-                            nombre: div.querySelector('.prodNombre').value,
-                            precio: parseFloat(div.querySelector('.prodPrecio').value),
-                            imagen: div.querySelector('.prodUrl').value
-                        });
+            const form = div.querySelector('form');
+            const btnEditar = div.querySelector('.btn-editar');
+            const btnGuardar = div.querySelector('.btn-guardar');
+            const btnEliminar = div.querySelector('.btnEliminarProd');
+            const inputs = div.querySelectorAll('input');
+
+            div.querySelector('.prodUrl').addEventListener('input', e => div.querySelector('.previewImagen').src = e.target.value || imgSrc);
+
+            btnEditar.addEventListener('click', () => {
+                inputs.forEach(i => i.disabled = false);
+                btnEditar.style.display = 'none';
+                btnGuardar.style.display = 'block';
+                btnGuardar.innerText = '💾 Guardar Cambios';
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                btnGuardar.disabled = true;
+                btnGuardar.innerText = 'Guardando...';
+
+                const newData = {
+                    nombre: div.querySelector('.prodNombre').value,
+                    precio: parseFloat(div.querySelector('.prodPrecio').value),
+                    imagen: div.querySelector('.prodUrl').value
+                };
+
+                try {
+                    if (id) {
+                        await updateDoc(doc(db, "productos", id), newData); 
+                    } else {
+                        const ref = await addDoc(collection(db, "productos"), newData); 
                         id = ref.id;
-                        div.querySelectorAll('input').forEach(i => i.disabled = true);
-                        div.querySelector('.btn-guardar').style.display = 'none';
-                        div.querySelector('.btnEliminarProd').style.display = 'block';
-                    } catch (error) { alert("Error al guardar"); }
-                });
-            }
-            div.querySelector('.btnEliminarProd').addEventListener('click', async () => {
-                if(confirm('¿Eliminar combo del Inicio?')) { if (id) await deleteDoc(doc(db, "productos", id)); div.remove(); }
+                    }
+                    inputs.forEach(i => i.disabled = true);
+                    btnGuardar.disabled = false;
+                    btnGuardar.style.display = 'none';
+                    btnEditar.style.display = 'block';
+                    btnEliminar.style.display = 'block';
+                } catch (error) {
+                    alert("Error al guardar");
+                    btnGuardar.disabled = false;
+                    btnGuardar.innerText = id ? '💾 Guardar Cambios' : 'Guardar Combo';
+                }
+            });
+
+            btnEliminar.addEventListener('click', async () => {
+                if(confirm('¿Seguro que deseas eliminar este combo?')) { 
+                    if (id) await deleteDoc(doc(db, "productos", id)); 
+                    div.remove(); 
+                }
             });
         }
         document.getElementById('btnAgregarNuevoFormulario').addEventListener('click', () => crearFormularioProducto());
         getDocs(collection(db, "productos")).then(snap => snap.forEach(doc => crearFormularioProducto(doc.data(), doc.id)));
 
 
-        // --- 3. NUEVA LÓGICA: MENÚ COMPLETO (La Carta) ---
         function crearFormularioCarta(data = null, id = null) {
             const div = document.createElement('div');
             div.className = 'formulario-admin';
             
-            // Selector de categorías pre-seleccionado
             const opcionesCategoria = ['Hamburguesas', 'Perros & Salchipapas', 'Postres', 'Bebidas', 'Promociones']
                 .map(cat => `<option value="${cat}" ${data?.categoria === cat ? 'selected' : ''}>${cat}</option>`).join('');
 
@@ -191,32 +212,63 @@
                         <label>Descripción / Ingredientes</label>
                         <input type="text" class="cartaDesc" value="${data?.descripcion || ''}" required ${data ? 'disabled' : ''}>
                     </div>
-                    <div class="acciones-formulario" style="margin-top:15px;">
-                        ${!data ? '<button type="submit" class="btn-guardar">Guardar en Carta</button>' : ''}
-                        <button type="button" class="btn-rojo btnEliminarCarta" ${!data ? 'style="display:none;"' : ''}>🗑️ Eliminar Plato</button>
+                    <div class="acciones-formulario" style="margin-top:15px; display:flex; gap:10px;">
+                        <button type="button" class="btn-editar" style="background:#3498db; color:white; border:none; padding:10px 15px; border-radius:4px; cursor:pointer; font-weight:bold; ${data ? '' : 'display:none;'}">✏️ Editar</button>
+                        <button type="submit" class="btn-guardar" style="background:#27ae60; color:white; border:none; padding:10px 15px; border-radius:4px; cursor:pointer; font-weight:bold; ${data ? 'display:none;' : ''}">Guardar Plato</button>
+                        <button type="button" class="btn-rojo btnEliminarCarta" style="${data ? '' : 'display:none;'}">🗑️ Eliminar</button>
                     </div>
                 </form>`;
-            document.getElementById('contenedorFormulariosCarta').appendChild(div);
+            document.getElementById('contenedorFormulariosCarta').prepend(div);
 
-            if (!data) {
-                div.querySelector('form').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    try {
-                        const ref = await addDoc(collection(db, "menu_completo"), {
-                            categoria: div.querySelector('.cartaCategoria').value,
-                            nombre: div.querySelector('.cartaNombre').value,
-                            precio: parseFloat(div.querySelector('.cartaPrecio').value),
-                            descripcion: div.querySelector('.cartaDesc').value
-                        });
+            const form = div.querySelector('form');
+            const btnEditar = div.querySelector('.btn-editar');
+            const btnGuardar = div.querySelector('.btn-guardar');
+            const btnEliminar = div.querySelector('.btnEliminarCarta');
+            const inputs = div.querySelectorAll('input, select');
+            
+            btnEditar.addEventListener('click', () => {
+                inputs.forEach(i => i.disabled = false);
+                btnEditar.style.display = 'none';
+                btnGuardar.style.display = 'block';
+                btnGuardar.innerText = '💾 Guardar Cambios';
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                btnGuardar.disabled = true;
+                btnGuardar.innerText = 'Guardando...';
+
+                const newData = {
+                    categoria: div.querySelector('.cartaCategoria').value,
+                    nombre: div.querySelector('.cartaNombre').value,
+                    precio: parseFloat(div.querySelector('.cartaPrecio').value),
+                    descripcion: div.querySelector('.cartaDesc').value
+                };
+
+                try {
+                    if (id) {
+                        await updateDoc(doc(db, "menu_completo", id), newData); 
+                    } else {
+                        const ref = await addDoc(collection(db, "menu_completo"), newData); 
                         id = ref.id;
-                        div.querySelectorAll('input, select').forEach(i => i.disabled = true);
-                        div.querySelector('.btn-guardar').style.display = 'none';
-                        div.querySelector('.btnEliminarCarta').style.display = 'block';
-                    } catch (error) { alert("Error al guardar en la carta"); }
-                });
-            }
-            div.querySelector('.btnEliminarCarta').addEventListener('click', async () => {
-                if(confirm('¿Eliminar este plato del menú completo?')) { if (id) await deleteDoc(doc(db, "menu_completo", id)); div.remove(); }
+                    }
+                    inputs.forEach(i => i.disabled = true);
+                    btnGuardar.disabled = false;
+                    btnGuardar.style.display = 'none';
+                    btnEditar.style.display = 'block';
+                    btnEliminar.style.display = 'block';
+                } catch (error) {
+                    alert("Error al guardar en la carta");
+                    btnGuardar.disabled = false;
+                    btnGuardar.innerText = id ? '💾 Guardar Cambios' : 'Guardar Plato';
+                }
+            });
+
+            btnEliminar.addEventListener('click', async () => {
+                if(confirm('¿Seguro que deseas eliminar este plato?')) { 
+                    if (id) await deleteDoc(doc(db, "menu_completo", id)); 
+                    div.remove(); 
+                }
             });
         }
         document.getElementById('btnAgregarItemCarta').addEventListener('click', () => crearFormularioCarta());
