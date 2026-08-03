@@ -12,3 +12,4 @@
 .plato p { margin-bottom: 10px; color: #555; }
 .precio { font-weight: bold; font-size: 1.2em; color: #27ae60; }
 @media (max-width: 768px) { .menu-grid { grid-template-columns: 1fr; } }
+.qr-footer { max-width: 120px; width: 100%; margin-top: 15px; border-radius: 8px; display: block; background-color: white; padding: 5px; box-sizing: border-box; }
