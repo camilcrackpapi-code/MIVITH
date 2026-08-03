@@ -9,6 +9,14 @@
 </head>
 <body class="body-acceso">
 
+    <div id="aviso-evaluacion" class="fondo-aviso-eval">
+        <div class="caja-aviso-eval">
+            <h3>🎓 Nota de Evaluación</h3>
+            <p>Se dejó el usuario y contraseña establecidos por temas de practicidad para la evaluación.</p>
+            <button onclick="document.getElementById('aviso-evaluacion').style.display='none'">Entendido</button>
+        </div>
+    </div>
+
     <div class="contenedor-acceso">
         <div class="cabecera-acceso">
             <h2>Mivith Admin</h2>
@@ -24,7 +32,7 @@
                 <input type="password" id="passLogin" value="admin123" required>
                 
                 <p id="mensajeLogin" class="mensaje-alerta oculto"></p>
-                <button type="submit" id="btnEntrar" class="btn-principal" onclick="alert('Se dejó el usuario y contraseña establecido por temas de practicidad para la evaluación.')">Entrar al Panel</button>
+                <button type="submit" id="btnEntrar" class="btn-principal">Entrar al Panel</button>
             </form>
         </div>
         
