@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sesion- Mivith</title>
+    <title>Sesion - Mivith</title>
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/acceso.css">
 </head>
@@ -12,35 +12,19 @@
     <div class="contenedor-acceso">
         <div class="cabecera-acceso">
             <h2>Mivith Admin</h2>
-            <div class="tabs">
-                <button id="tabLogin" class="tab activo" onclick="mostrarFormulario('login')">Iniciar Sesión</button>
-                <button id="tabRegistro" class="tab" onclick="mostrarFormulario('registro')">Crear Cuenta</button>
-            </div>
+            <p style="color: #c1d5ee; padding-bottom: 20px; margin: 0; font-weight: bold;">Iniciar Sesión</p>
         </div>
 
         <div class="cuerpo-acceso">
-            <!-- Login -->
             <form id="formLogin" class="formulario activo" novalidate>
                 <label for="emailLogin">Correo Electrónico</label>
-                <input type="email" id="emailLogin" placeholder="admin@correo.com" required>
+                <input type="email" id="emailLogin" value="Admin@gmail.com" required>
                 
                 <label for="passLogin">Contraseña</label>
-                <input type="password" id="passLogin" placeholder="••••••••" required>
+                <input type="password" id="passLogin" value="admin123" required>
                 
                 <p id="mensajeLogin" class="mensaje-alerta oculto"></p>
                 <button type="submit" id="btnEntrar" class="btn-principal">Entrar al Panel</button>
-            </form>
-
-            <!-- Formulario de Registro -->
-            <form id="formRegistro" class="formulario oculto" novalidate>
-                <label for="emailReg">Nuevo Correo Electrónico</label>
-                <input type="email" id="emailReg" placeholder="nuevo@correo.com" required>
-                
-                <label for="passReg">Nueva Contraseña (Mínimo 6 caracteres)</label>
-                <input type="password" id="passReg" placeholder="••••••••" required>
-                
-                <p id="mensajeReg" class="mensaje-alerta oculto"></p>
-                <button type="submit" id="btnRegistrar" class="btn-principal">Crear Cuenta</button>
             </form>
         </div>
         
@@ -49,34 +33,6 @@
         </div>
     </div>
 
-    <script>
-        function mostrarFormulario(tipo) {
-            const formLogin = document.getElementById('formLogin');
-            const formReg = document.getElementById('formRegistro');
-            const tabLogin = document.getElementById('tabLogin');
-            const tabReg = document.getElementById('tabRegistro');
-
-            if (tipo === 'login') {
-                formLogin.classList.remove('oculto');
-                formLogin.classList.add('activo');
-                formReg.classList.remove('activo');
-                formReg.classList.add('oculto');
-                
-                tabLogin.classList.add('activo');
-                tabReg.classList.remove('activo');
-            } else {
-                formReg.classList.remove('oculto');
-                formReg.classList.add('activo');
-                formLogin.classList.remove('activo');
-                formLogin.classList.add('oculto');
-                
-                tabReg.classList.add('activo');
-                tabLogin.classList.remove('activo');
-            }
-        }
-    </script>
-
-    <!-- Firebase -->
     <script type="module" src="../controllers/login.js"></script>
 </body>
 </html>
