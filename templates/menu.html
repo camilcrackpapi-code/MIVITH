@@ -24,7 +24,6 @@
         <h2>Nuestro Menú</h2>
         <p class="instruccion-scroll">↔ Desliza hacia los lados para ver todas nuestras categorías</p>
         
-        <!-- CONTENEDOR DINÁMICO (Firebase inyectará los datos aquí) -->
         <div class="contenedor-horizontal" id="contenedorCartaDinamico">
             <p style="text-align: center; width: 100%; color: #8d6e63;">Cargando menú...</p>
         </div>
@@ -60,14 +59,12 @@
         </div>
     </footer>
     
-    <!-- SCRIPT PARA CARGAR LA CARTA DESDE FIREBASE -->
     <script type="module">
         import { db } from '../controllers/firebase-config.js';
         import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
         const contenedorCarta = document.getElementById('contenedorCartaDinamico');
 
-        // Orden de las categorías a mostrar
         const ordenCategorias = ['Hamburguesas', 'Perros & Salchipapas', 'Postres', 'Bebidas', 'Promociones'];
 
         onSnapshot(collection(db, "menu_completo"), (snapshot) => {
@@ -76,9 +73,8 @@
                 return;
             }
 
-            // Agrupar los platos por categoría
             const platosPorCategoria = {};
-            ordenCategorias.forEach(cat => platosPorCategoria[cat] = []); // Inicializar arrays
+            ordenCategorias.forEach(cat => platosPorCategoria[cat] = []);
 
             snapshot.forEach(doc => {
                 const plato = doc.data();
@@ -87,16 +83,13 @@
                 }
             });
 
-            // Generar el HTML
             let htmlFinal = '';
             
             ordenCategorias.forEach(categoria => {
                 const platos = platosPorCategoria[categoria];
                 
-                // Solo dibuja la columna si hay platos en esa categoría
                 if (platos.length > 0) {
                     
-                    // Si es promoción, poner el título en amarillo según tu CSS original
                     const colorTitulo = categoria === 'Promociones' ? 'style="color: #f1c40f;"' : '';
 
                     let columnaHTML = `
